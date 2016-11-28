@@ -1,0 +1,12 @@
+# Project files
+.idea
+
+# Build directories
+cmake-build-debug
+
+# Build files
+*.o
+
+# That one lua build file
+shared/lua-5.3.1/src/lua
+shared/lua-5.3.1/src/luac
