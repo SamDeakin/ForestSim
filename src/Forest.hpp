@@ -1,5 +1,8 @@
+#pragma once
+
 #include "Window.hpp"
 #include "ShaderProgram.hpp"
+#include "Skybox.hpp"
 
 class Forest : public Window {
 public:
@@ -23,4 +26,6 @@ protected:
 
 private:
     ShaderProgram m_shader;
+
+    Skybox m_skybox;
 };

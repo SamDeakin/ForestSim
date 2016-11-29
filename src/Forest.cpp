@@ -11,7 +11,7 @@ using namespace std;
 using namespace glm;
 
 Forest::Forest() {
-
+    // Empty
 }
 
 Forest::~Forest() {}
@@ -27,6 +27,8 @@ void Forest::init() {
     m_shader.attachFragmentShader(
             getAssetFilePath("FragmentShader.glsl").c_str());
     m_shader.link();
+
+    m_skybox.init();
 }
 
 void Forest::appLogic() {

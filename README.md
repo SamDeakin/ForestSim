@@ -2,7 +2,7 @@
 Use CMAKE. Good luck
 
 #TODO
-Tuesday
+###Tuesday
 2. Skybox
     Skybox
 4. Movement
@@ -12,16 +12,18 @@ Tuesday
 4. Movement
     Finish
 1. Load objects in w/ LUA
-Wednesday
+###Wednesday
 1. Finish
 6. Shading
 7. Shadow Mapping
-Thursday
+###Thursday
 3. Variations
 5. Textures
-Friday
+###Friday
 10. FXAA
-Saturday
+###Saturday
 9. Crepuscular Rays
-Sunday
+###Sunday
 8. SSAO
+
+#Credits for assets:

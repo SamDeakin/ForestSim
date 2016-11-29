@@ -11,7 +11,9 @@ add_subdirectory(shared/glfw-3.1.1)
 
 set(SOURCE_FILES
         main.cpp
-        src/Forest.cpp)
+        src/Forest.cpp
+        src/Skybox.cpp
+        src/Skybox.hpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp
@@ -70,6 +72,10 @@ add_subdirectory(${GL3W_DIRECTORY})
 set(IMGUI_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shared/imgui)
 add_subdirectory(${IMGUI_DIRECTORY})
 
+# Add lodepng
+set(LODEPNG_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shared/lodepng)
+add_subdirectory(${LODEPNG_DIRECTORY})
+
 # Add imgui implementation
 set(IMGUI_IMPL_SOURCE
         shared/imgui/imgui_impl_glfw_gl3.cpp)
@@ -85,6 +91,7 @@ target_link_libraries(ForestSim ${OPENGL_gl_LIBRARY})
 target_link_libraries(ForestSim lua)
 target_link_libraries(ForestSim imgui)
 target_link_libraries(ForestSim gl3w)
+target_link_libraries(ForestSim lodepng)
 target_link_libraries(ForestSim imgui_impl)
 
 # Copy Assets on success
