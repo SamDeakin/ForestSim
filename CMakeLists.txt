@@ -10,7 +10,8 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORSE)
 add_subdirectory(shared/glfw-3.1.1)
 
 set(SOURCE_FILES
-        main.cpp)
+        main.cpp
+        src/Forest.cpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp
@@ -20,6 +21,7 @@ set(UTIL_SRC
 
 add_executable(ForestSim ${SOURCE_FILES} ${UTIL_SRC})
 target_include_directories(ForestSim PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/utils)
+target_include_directories(ForestSim PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 find_package(OpenGL REQUIRED)
 MESSAGE( STATUS "OpenGL: " ${OPENGL_INCLUDE_DIR})
@@ -28,9 +30,18 @@ MESSAGE( STATUS "OpenGL: " ${OPENGL_INCLUDE_DIR})
 # Cmake does a lot of wierd stuff to make .frameworks work on MacOS, so this call fails there
 IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_include_directories(ForestSim ${OPENGL_INCLUDE_DIR})
+else()
+    # We are a MacOS system, so link with cocoa
+    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
+    FIND_LIBRARY(IOKIT_LIBRARY IOKit)
+    FIND_LIBRARY(CV_LIBRARY CoreVideo)
+    target_link_libraries(ForestSim ${COCOA_LIBRARY})
+    target_link_libraries(ForestSim ${IOKIT_LIBRARY})
+    target_link_libraries(ForestSim ${CV_LIBRARY})
 endif()
 
-target_include_directories(ForestSim PUBLIC "${CMAKE_SOURCE_DIR}/include/")
+set(PUBLIC_INCLUDE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(ForestSim PUBLIC ${PUBLIC_INCLUDE})
 
 # Add Lua
 set(LUA_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shared/lua-5.3.1/src)
@@ -53,12 +64,25 @@ add_dependencies(lua build_lua)
 
 # Add gl3w
 set(GL3W_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shared/gl3w)
+add_subdirectory(${GL3W_DIRECTORY})
 
 # Add imgui
 set(IMGUI_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shared/imgui)
+add_subdirectory(${IMGUI_DIRECTORY})
+
+# Add imgui implementation
+set(IMGUI_IMPL_SOURCE
+        shared/imgui/imgui_impl_glfw_gl3.cpp)
+add_library(imgui_impl ${IMGUI_IMPL_SOURCE})
+target_include_directories(imgui_impl PUBLIC ${IMGUI_DIRECTORY})
+target_include_directories(imgui_impl PUBLIC ${GL3W_DIRECTORY})
+target_include_directories(imgui_impl PUBLIC ${PUBLIC_INCLUDE})
 
 target_include_directories(ForestSim PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/shared)
 
 target_link_libraries(ForestSim glfw)
 target_link_libraries(ForestSim ${OPENGL_gl_LIBRARY})
 target_link_libraries(ForestSim lua)
+target_link_libraries(ForestSim imgui)
+target_link_libraries(ForestSim gl3w)
+target_link_libraries(ForestSim imgui_impl)

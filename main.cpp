@@ -1,13 +1,12 @@
-#include <iostream>
-#include <OpenGL/glext.h>
-#include <GLFW/glfw3.h>
-#include <lua.h>
-#include <glm/glm.hpp>
-#include <imgui/imgui.h>
-#include "OpenGLImport.hpp"
+#include "Window.hpp"
+#include "Forest.hpp"
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    glm::vec3 v = glm::vec3();
+#include <string>
+
+using namespace std;
+
+int main(int argc, char **argv) {
+    const string title = "Actual Cannibal";
+    Window::launch(argc, argv, new Forest(), 1024, 768, title);
     return 0;
 }
