@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include "ShaderProgram.hpp"
 
 class Forest : public Window {
 public:
@@ -19,4 +20,7 @@ protected:
     virtual bool mouseScrollEvent(double xOffSet, double yOffSet) override;
     virtual bool windowResizeEvent(int width, int height) override;
     virtual bool keyInputEvent(int key, int action, int mods) override;
+
+private:
+    ShaderProgram m_shader;
 };

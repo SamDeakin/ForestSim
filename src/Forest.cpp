@@ -1,6 +1,14 @@
 #include "Forest.hpp"
 
+#include "ShaderProgram.hpp"
+
+#include "OpenGLImport.hpp"
+
 #include <imgui/imgui.h>
+#include <glm/glm.hpp>
+
+using namespace std;
+using namespace glm;
 
 Forest::Forest() {
 
@@ -9,7 +17,16 @@ Forest::Forest() {
 Forest::~Forest() {}
 
 void Forest::init() {
+    // Set the background colour.
+    glClearColor(1.0, 1.0, 0.0, 1.0);
 
+    // Build the shader
+    m_shader.generateProgramObject();
+    m_shader.attachVertexShader(
+            getAssetFilePath("VertexShader.glsl").c_str());
+    m_shader.attachFragmentShader(
+            getAssetFilePath("FragmentShader.glsl").c_str());
+    m_shader.link();
 }
 
 void Forest::appLogic() {

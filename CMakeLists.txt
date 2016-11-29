@@ -86,3 +86,8 @@ target_link_libraries(ForestSim lua)
 target_link_libraries(ForestSim imgui)
 target_link_libraries(ForestSim gl3w)
 target_link_libraries(ForestSim imgui_impl)
+
+# Copy Assets on success
+add_custom_command(TARGET ForestSim POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/Assets $<TARGET_FILE_DIR:ForestSim>/Assets)
