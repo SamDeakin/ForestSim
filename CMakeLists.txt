@@ -13,9 +13,9 @@ set(SOURCE_FILES
         main.cpp
         src/Forest.cpp
         src/Skybox.cpp
-        src/Skybox.hpp
         src/Camera.cpp
-        src/Camera.hpp)
+        src/RenderObject.cpp
+        src/BasicGround.cpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp
@@ -112,3 +112,9 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/SkyboxFS.glsl
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/SkyboxVS.glsl
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_SOURCE_DIR}/Assets/SkyboxVS.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/SkyboxVS.glsl)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/PhuongUntexturedFS.glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/PhuongUntexturedFS.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/PhuongUntexturedFS.glsl)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/PhuongUntexturedVS.glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/PhuongUntexturedVS.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/PhuongUntexturedVS.glsl)

@@ -38,8 +38,17 @@ void Forest::init() {
             getAssetFilePath("FragmentShader.glsl").c_str());
     m_shader.link();
 
+    // Create the Phuong shader for untextured models
+    m_phuong_untextured.generateProgramObject();
+    m_phuong_untextured.attachVertexShader(
+            getAssetFilePath("PhuongUntexturedVS.glsl").c_str());
+    m_phuong_untextured.attachFragmentShader(
+            getAssetFilePath("PhuongUntexturedFS.glsl").c_str());
+    m_phuong_untextured.link();
+
     m_skybox.init();
     m_camera.init(m_framebufferWidth, m_framebufferHeight);
+    m_ground.init(&m_phuong_untextured);
 }
 
 void Forest::appLogic() {
@@ -70,9 +79,14 @@ void Forest::guiLogic() {
 }
 
 void Forest::draw() {
+    mat4 P = m_P();
+    mat4 V = m_V();
+
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_skybox.render(m_P(), m_V());
+    m_skybox.render(P, V);
+
+    m_ground.render(P, V);
 }
 
 void Forest::cleanup() {
@@ -220,6 +234,6 @@ bool Forest::mouse3_held() {
 
 void Forest::rotateCamera(double dx, double dy) {
     quat rx = quat(vec3(0.0, dx * -0.005, 0.0));
-    quat ry = quat(vec3(dy * 0.005, 0.0, 0.0));
+    quat ry = quat(vec3(dy * -0.005, 0.0, 0.0));
     m_camera.rotate(rx, ry);
 }

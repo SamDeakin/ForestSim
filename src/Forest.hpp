@@ -7,6 +7,7 @@
 #include "ShaderProgram.hpp"
 #include "Skybox.hpp"
 #include "Camera.hpp"
+#include "BasicGround.hpp"
 
 class Forest : public Window {
 public:
@@ -32,6 +33,10 @@ private:
     ShaderProgram m_shader;
     Skybox m_skybox;
     Camera m_camera;
+    BasicGround m_ground;
+
+    // Extra shaders
+    ShaderProgram m_phuong_untextured;
 
     // Transforms
     glm::mat4 m_P();
