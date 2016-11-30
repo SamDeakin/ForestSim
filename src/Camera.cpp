@@ -41,6 +41,9 @@ void Camera::move(vec3 dist) {
 }
 
 void Camera::rotate(quat rot_x, quat rot_y) {
+    // This ordering is very specific
+    // We want up and down rotation to take place relative to the current angle
+    // But left/right should be relative to world
     m_V_rot = rot_y * m_V_rot * rot_x;
 }
 
