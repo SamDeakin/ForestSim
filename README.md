@@ -35,4 +35,7 @@ Interaction is as specified. The z, x and c buttons have also been made aliases 
 8. SSAO
 
 #Credits for assets:
-SkyboxSet1 is from Heiko Irrgang, https://93i.de/p/free-skybox-texture-set/
+    SkyboxSet1 is from Heiko Irrgang, https://93i.de/p/free-skybox-texture-set/
+    GreenPine - http://tf3dm.com/3d-model/green-pine-26327.html
+    BroadLeafStraightTrunk - http://tf3dm.com/3d-model/broad-leaf-straight-trunk-39747.html
+    
