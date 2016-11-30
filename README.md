@@ -27,3 +27,4 @@ Use CMAKE. Good luck
 8. SSAO
 
 #Credits for assets:
+SkyboxSet1 is from Heiko Irrgang, https://93i.de/p/free-skybox-texture-set/

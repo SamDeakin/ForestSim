@@ -1,5 +1,8 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include "Window.hpp"
 #include "ShaderProgram.hpp"
 #include "Skybox.hpp"
@@ -26,6 +29,13 @@ protected:
 
 private:
     ShaderProgram m_shader;
-
     Skybox m_skybox;
+
+    // Transforms
+    glm::mat4 m_P;
+    glm::mat4 m_V(); // Function to aggregate the parts of the V matrix
+    glm::mat4 m_V_origin; // Starting point
+    glm::quat m_V_rot;
+    glm::mat4 m_V_trans;
+    glm::mat4 m_V_scale;
 };

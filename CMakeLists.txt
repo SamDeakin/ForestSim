@@ -98,3 +98,15 @@ target_link_libraries(ForestSim imgui_impl)
 add_custom_command(TARGET ForestSim POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/Assets $<TARGET_FILE_DIR:ForestSim>/Assets)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/FragmentShader.glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/FragmentShader.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/FragmentShader.glsl)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/VertexShader.glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/VertexShader.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/VertexShader.glsl)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/SkyboxFS.glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/SkyboxFS.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/SkyboxFS.glsl)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/SkyboxVS.glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/SkyboxVS.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/SkyboxVS.glsl)

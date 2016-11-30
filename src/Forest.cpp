@@ -6,6 +6,8 @@
 
 #include <imgui/imgui.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace std;
 using namespace glm;
@@ -18,7 +20,7 @@ Forest::~Forest() {}
 
 void Forest::init() {
     // Set the background colour.
-    glClearColor(1.0, 1.0, 0.0, 1.0);
+    glClearColor(1.0, 0.0, 1.0, 1.0);
 
     // Build the shader
     m_shader.generateProgramObject();
@@ -29,6 +31,15 @@ void Forest::init() {
     m_shader.link();
 
     m_skybox.init();
+
+    m_P = perspective(
+            radians(60.0f),
+            float(m_framebufferWidth) / float(m_framebufferHeight),
+            0.1f, 1000.0f);
+    m_V_rot = quat();
+    m_V_scale = mat4();
+    m_V_trans = mat4();
+    m_V_origin = lookAt(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
 }
 
 void Forest::appLogic() {
@@ -59,13 +70,19 @@ void Forest::guiLogic() {
 }
 
 void Forest::draw() {
-
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_skybox.render(m_P, m_V());
 }
 
 void Forest::cleanup() {
 
 }
 
+mat4 Forest::m_V() {
+    // TODO is this the right order?
+    return mat4_cast(m_V_rot) * m_V_scale * m_V_trans * m_V_origin;
+}
 
 //-- Virtual callback methods
 bool Forest::cursorEnterWindowEvent(int entered) {

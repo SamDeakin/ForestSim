@@ -8,7 +8,10 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "ShaderProgram.hpp"
+#include "OpenGLImport.hpp"
 
 class Skybox {
 public:
@@ -20,13 +23,17 @@ public:
     void init();
 
     // Render the skybox
-    void render();
+    void render(glm::mat4 P, glm::mat4 V);
 
 private:
     // File name
-    std::string texture;
+    std::string texture_name;
 
     // Skybox specific shader
+    ShaderProgram m_shader;
+    GLint m_uniform_P;
+    GLint m_uniform_V;
+    GLint m_uniform_texture;
 
     // Skybox textures
     unsigned width;
@@ -37,6 +44,11 @@ private:
     std::vector<unsigned char> left;
     std::vector<unsigned char> right;
     std::vector<unsigned char> up;
+
+    unsigned m_faces = 6;
+    GLuint m_texture;
+    GLuint m_VAO;
+    GLuint m_VBO;
 };
 
 
