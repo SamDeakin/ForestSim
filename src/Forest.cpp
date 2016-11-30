@@ -52,7 +52,23 @@ void Forest::init() {
 }
 
 void Forest::appLogic() {
+    double dx = 0;
+    double dy = 0;
+    double speed = 1.0;
 
+    if (m_w_held) {
+        dy += speed;
+    }
+    if (m_a_held) {
+        dx += speed;
+    }
+    if (m_s_held) {
+        dy -= speed;
+    }
+    if (m_d_held) {
+        dx -= speed;
+    }
+    walkCamera(dx, dy);
 }
 
 void Forest::guiLogic() {
@@ -113,7 +129,7 @@ bool Forest::mouseMoveEvent(double xPos, double yPos) {
     double dy = m_mousey - yPos;
 
     if (mouse1_held()) {
-
+        // Nothing for now
     }
 
     if (mouse2_held()) {
@@ -121,7 +137,7 @@ bool Forest::mouseMoveEvent(double xPos, double yPos) {
     }
 
     if (mouse3_held()) {
-
+        moveCamera(dx, dy);
     }
 
     // Do this after so interaction functions have access to new and old coordinates
@@ -170,11 +186,17 @@ bool Forest::mouseButtonInputEvent(int button, int actions, int mods) {
 }
 
 bool Forest::mouseScrollEvent(double xOffSet, double yOffSet) {
+    bool eventHandled(false);
 
+    zoomCamera(yOffSet);
+    eventHandled = true;
+
+    return eventHandled;
 }
 
 bool Forest::windowResizeEvent(int width, int height) {
-
+    bool eventHandled(false);
+    return eventHandled;
 }
 
 bool Forest::keyInputEvent(int key, int action, int mods) {
@@ -196,6 +218,23 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_Q:
                 glfwSetWindowShouldClose(m_window, GL_TRUE);
+                eventHandled = true;
+                break;
+            case GLFW_KEY_W:
+                m_w_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_A:
+                m_a_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_S:
+                m_s_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_D:
+                m_d_held = true;
+                eventHandled = true;
                 break;
             default:
                 break;
@@ -212,6 +251,22 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_C:
                 m_c_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_W:
+                m_w_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_A:
+                m_a_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_S:
+                m_s_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_D:
+                m_d_held = false;
                 eventHandled = true;
                 break;
             default:
@@ -236,4 +291,17 @@ void Forest::rotateCamera(double dx, double dy) {
     quat rx = quat(vec3(0.0, dx * -0.005, 0.0));
     quat ry = quat(vec3(dy * -0.005, 0.0, 0.0));
     m_camera.rotate(rx, ry);
+}
+
+void Forest::walkCamera(double dx, double dy) {
+    m_camera.move(vec3(dx, 0.0f, -dy));
+}
+
+void Forest::zoomCamera(double dx) {
+    // Implemented as moving forward (-z)
+    m_camera.move(vec3(0.0f, 0.0f, float(dx) * 0.1f));
+}
+
+void Forest::moveCamera(double dx, double dy) {
+    m_camera.move(vec3(float(dx) * 0.1f, -float(dy) * 0.1f, 0.0f));
 }

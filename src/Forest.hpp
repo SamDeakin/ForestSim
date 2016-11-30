@@ -46,16 +46,26 @@ private:
     double m_mousex;
     double m_mousey;
 
+    bool m_w_held;
+    bool m_a_held;
+    bool m_s_held;
+    bool m_d_held;
+    void walkCamera(double dx, double dy);
+
+    void zoomCamera(double dx);
+
     bool mouse1_held();
     bool m_z_held;
     bool m_mouse1_held;
+    // No movement action here
 
     bool mouse2_held();
     bool m_c_held;
     bool m_mouse2_held;
+    void rotateCamera(double dx, double dy);
 
     bool mouse3_held();
     bool m_x_held;
     bool m_mouse3_held;
-    void rotateCamera(double dx, double dy);
+    void moveCamera(double dx, double dy);
 };

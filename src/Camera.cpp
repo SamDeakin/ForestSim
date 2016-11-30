@@ -38,7 +38,10 @@ glm::mat4 Camera::V() {
 }
 
 void Camera::move(vec3 dist) {
-    m_V_trans = translate(m_V_trans, dist);
+    vec4 adjustedDist = vec4(dist, 0.0f) * mat4_cast(m_V_rot);
+    mat4 trans = translate(mat4(), vec3(adjustedDist));
+
+    m_V_trans = trans * m_V_trans;
 }
 
 void Camera::rotate(quat rot_x, quat rot_y) {

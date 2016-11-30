@@ -17,6 +17,7 @@ Interaction is as specified. The z, x and c buttons have also been made aliases 
 1. Load objects in w/ LUA
 ###Wednesday
 1. Finish
+4. Check move values, add shift
 6. Shading
 7. Shadow Mapping
 ###Thursday
