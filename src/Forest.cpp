@@ -220,6 +220,10 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 glfwSetWindowShouldClose(m_window, GL_TRUE);
                 eventHandled = true;
                 break;
+            case GLFW_KEY_R:
+                resetPosition();
+                eventHandled = true;
+                break;
             case GLFW_KEY_W:
                 m_w_held = true;
                 eventHandled = true;
@@ -304,4 +308,8 @@ void Forest::zoomCamera(double dx) {
 
 void Forest::moveCamera(double dx, double dy) {
     m_camera.move(vec3(float(dx) * 0.1f, -float(dy) * 0.1f, 0.0f));
+}
+
+void Forest::resetPosition() {
+    m_camera.reset();
 }

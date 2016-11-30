@@ -68,4 +68,6 @@ private:
     bool m_x_held;
     bool m_mouse3_held;
     void moveCamera(double dx, double dy);
+
+    void resetPosition();
 };

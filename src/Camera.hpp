@@ -20,6 +20,8 @@ public:
     void move(glm::vec3 dist);
     void rotate(glm::quat rx, glm::quat ry);
     void scale(glm::vec3 amount); // Probably not used
+
+    void reset();
 private:
     glm::mat4 m_P;
     glm::mat4 m_V_origin; // Starting point

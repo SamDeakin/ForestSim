@@ -4,6 +4,10 @@ Use CMAKE. Good luck
 # Interaction
 Interaction is as specified. The z, x and c buttons have also been made aliases of the 3 mouse buttons.
 
+# Extra keys:
+    Q - Quit
+    R - Reset
+
 #TODO
 ###Tuesday
 2. Skybox

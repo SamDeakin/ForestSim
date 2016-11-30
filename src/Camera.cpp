@@ -54,3 +54,9 @@ void Camera::rotate(quat rot_x, quat rot_y) {
 void Camera::scale(vec3 amount) {
     m_V_scale = glm::scale(m_V_scale, amount);
 }
+
+void Camera::reset() {
+    m_V_rot = quat();
+    m_V_scale = mat4();
+    m_V_trans = mat4();
+}
