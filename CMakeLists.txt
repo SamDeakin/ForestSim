@@ -13,7 +13,9 @@ set(SOURCE_FILES
         main.cpp
         src/Forest.cpp
         src/Skybox.cpp
-        src/Skybox.hpp)
+        src/Skybox.hpp
+        src/Camera.cpp
+        src/Camera.hpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp

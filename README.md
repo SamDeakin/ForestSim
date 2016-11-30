@@ -1,6 +1,9 @@
 # Compilation:
 Use CMAKE. Good luck
 
+# Interaction
+Interaction is as specified. The z, x and c buttons have also been made aliases of the 3 mouse buttons.
+
 #TODO
 ###Tuesday
 2. Skybox

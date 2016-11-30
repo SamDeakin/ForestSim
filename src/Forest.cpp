@@ -9,10 +9,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <iostream>
+
 using namespace std;
 using namespace glm;
 
-Forest::Forest() {
+Forest::Forest() :
+    m_z_held(false),
+    m_x_held(false),
+    m_c_held(false),
+    m_mouse1_held(false),
+    m_mouse2_held(false),
+    m_mouse3_held(false) {
     // Empty
 }
 
@@ -31,15 +39,7 @@ void Forest::init() {
     m_shader.link();
 
     m_skybox.init();
-
-    m_P = perspective(
-            radians(60.0f),
-            float(m_framebufferWidth) / float(m_framebufferHeight),
-            0.1f, 1000.0f);
-    m_V_rot = quat();
-    m_V_scale = mat4();
-    m_V_trans = mat4();
-    m_V_origin = lookAt(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+    m_camera.init(m_framebufferWidth, m_framebufferHeight);
 }
 
 void Forest::appLogic() {
@@ -72,16 +72,19 @@ void Forest::guiLogic() {
 void Forest::draw() {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_skybox.render(m_P, m_V());
+    m_skybox.render(m_P(), m_V());
 }
 
 void Forest::cleanup() {
 
 }
 
+mat4 Forest::m_P() {
+    return m_camera.P();
+}
+
 mat4 Forest::m_V() {
-    // TODO is this the right order?
-    return mat4_cast(m_V_rot) * m_V_scale * m_V_trans * m_V_origin;
+    return m_camera.V();
 }
 
 //-- Virtual callback methods
@@ -90,11 +93,66 @@ bool Forest::cursorEnterWindowEvent(int entered) {
 }
 
 bool Forest::mouseMoveEvent(double xPos, double yPos) {
+    bool eventHandled(false);
 
+    double dx = m_mousex - xPos;
+    double dy = m_mousey - yPos;
+
+    if (mouse1_held()) {
+
+    }
+
+    if (mouse2_held()) {
+        rotateCamera(dx, dy);
+    }
+
+    if (mouse3_held()) {
+
+    }
+
+    // Do this after so interaction functions have access to new and old coordinates
+    m_mousex = xPos;
+    m_mousey = yPos;
+
+    return eventHandled;
 }
 
 bool Forest::mouseButtonInputEvent(int button, int actions, int mods) {
+    bool eventHandled(false);
 
+    if (!ImGui::IsMouseHoveringAnyWindow()) {
+        // First change held buttons
+        if (actions == GLFW_PRESS) {
+            switch (button) {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    m_mouse1_held = true;
+                    break;
+                case GLFW_MOUSE_BUTTON_MIDDLE:
+                case GLFW_MOUSE_BUTTON_4: // Because 3 is wierd on osx
+                    m_mouse3_held = true;
+                    break;
+                case GLFW_MOUSE_BUTTON_RIGHT:
+                    m_mouse2_held = true;
+                    break;
+            }
+        } else if (actions == GLFW_RELEASE) {
+            switch (button) {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    m_mouse1_held = false;
+                    break;
+                case GLFW_MOUSE_BUTTON_MIDDLE:
+                case GLFW_MOUSE_BUTTON_4:
+                    m_mouse3_held = false;
+                    break;
+                case GLFW_MOUSE_BUTTON_RIGHT:
+                    m_mouse2_held = false;
+                    break;
+            }
+
+        }
+    }
+
+    return eventHandled;
 }
 
 bool Forest::mouseScrollEvent(double xOffSet, double yOffSet) {
@@ -106,6 +164,62 @@ bool Forest::windowResizeEvent(int width, int height) {
 }
 
 bool Forest::keyInputEvent(int key, int action, int mods) {
+    bool eventHandled(false);
 
+    if (action == GLFW_PRESS) {
+        switch(key) {
+            case GLFW_KEY_Z:
+                m_z_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_X:
+                m_x_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_C:
+                m_c_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_Q:
+                glfwSetWindowShouldClose(m_window, GL_TRUE);
+                break;
+            default:
+                break;
+        }
+    } else if (action == GLFW_RELEASE) {
+        switch(key) {
+            case GLFW_KEY_Z:
+                m_z_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_X:
+                m_x_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_C:
+                m_c_held = false;
+                eventHandled = true;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return eventHandled;
 }
 
+bool Forest::mouse1_held() {
+    return m_mouse1_held || m_z_held;
+}
+bool Forest::mouse2_held() {
+    return m_mouse2_held || m_c_held;
+}
+bool Forest::mouse3_held() {
+    return m_mouse3_held || m_x_held;
+}
+
+void Forest::rotateCamera(double dx, double dy) {
+    quat rx = quat(vec3(0.0, dx * -0.005, 0.0));
+    quat ry = quat(vec3(dy * 0.005, 0.0, 0.0));
+    m_camera.rotate(rx, ry);
+}

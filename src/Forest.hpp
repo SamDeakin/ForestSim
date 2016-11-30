@@ -6,6 +6,7 @@
 #include "Window.hpp"
 #include "ShaderProgram.hpp"
 #include "Skybox.hpp"
+#include "Camera.hpp"
 
 class Forest : public Window {
 public:
@@ -30,12 +31,26 @@ protected:
 private:
     ShaderProgram m_shader;
     Skybox m_skybox;
+    Camera m_camera;
 
     // Transforms
-    glm::mat4 m_P;
+    glm::mat4 m_P();
     glm::mat4 m_V(); // Function to aggregate the parts of the V matrix
-    glm::mat4 m_V_origin; // Starting point
-    glm::quat m_V_rot;
-    glm::mat4 m_V_trans;
-    glm::mat4 m_V_scale;
+
+    // Movement interaction variables and functions
+    double m_mousex;
+    double m_mousey;
+
+    bool mouse1_held();
+    bool m_z_held;
+    bool m_mouse1_held;
+
+    bool mouse2_held();
+    bool m_c_held;
+    bool m_mouse2_held;
+
+    bool mouse3_held();
+    bool m_x_held;
+    bool m_mouse3_held;
+    void rotateCamera(double dx, double dy);
 };
