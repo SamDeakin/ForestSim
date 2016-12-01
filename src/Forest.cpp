@@ -11,6 +11,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <iostream>
+#include <map>
 
 using namespace std;
 using namespace glm;
@@ -26,6 +27,7 @@ Forest::Forest() :
 }
 
 Forest::~Forest() {
+    Forest();
     if (list) {
         delete list;
     }
@@ -59,11 +61,13 @@ void Forest::init() {
     m_camera.init(m_framebufferWidth, m_framebufferHeight);
     m_ground.init(&m_phuong_untextured);
 
-    // Create shader list for rendered objects
-    // TODO
+    if (list) {
+        // Create shader list for rendered objects
+        map<ShaderType,ShaderProgram*> shaders;
+        shaders.insert(pair<ShaderType,ShaderProgram*>(ShaderType::PHUONG_UNTEXTURED, &m_phuong_untextured));
 
-    // Draw renderlist
-    // TODO
+        list->init(shaders);
+    }
 }
 
 void Forest::appLogic() {
@@ -117,7 +121,7 @@ void Forest::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_skybox.render(P, V);
 
-    m_ground.render(P, V);
+//    m_ground.render(P, V);
 
     if (list) {
         list->render(P, V);

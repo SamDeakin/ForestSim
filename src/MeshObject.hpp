@@ -31,6 +31,15 @@ protected:
 private:
     ShaderProgram *program;
     ShaderType type;
+
+    GLint m_uniform_P;
+    GLint m_uniform_V;
+
+    GLuint m_VAO;
+    GLuint m_VBO;
+    GLuint m_NBO;
+    GLuint m_CBO;
+    GLuint m_MBO;
 };
 
 
