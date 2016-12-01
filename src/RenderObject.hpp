@@ -32,6 +32,15 @@ public:
 
     // Get the required shader type for this object
     virtual ShaderType getShaderType();
+
+    // Functions for changing the model transform
+    // A sublcass may or may not be affected by these
+    void rotate(char axis, double amount);
+    void scale(glm::vec3 amount);
+    void translate(glm::vec3 amount);
+
+protected:
+    glm::mat4 M;
 };
 
 

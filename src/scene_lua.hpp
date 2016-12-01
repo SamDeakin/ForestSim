@@ -1,5 +1,6 @@
 #pragma once
 
 #include <string>
+#include "RenderList.hpp"
 
-bool run_lua(const std::string& filename);
+RenderList* run_lua(const std::string& filename);

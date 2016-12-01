@@ -80,7 +80,7 @@ void BasicGround::init(ShaderProgram *program) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
 
     // Model Transform
-    mat4 modelTransform = scale(mat4(1.0f), vec3(1000.0f, 1000.0f, 1000.0f));
+    mat4 modelTransform = glm::scale(mat4(1.0f), vec3(1000.0f, 1000.0f, 1000.0f));
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(mat4), value_ptr(modelTransform), GL_STATIC_DRAW);
     glEnableVertexAttribArray(3);

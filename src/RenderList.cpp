@@ -39,3 +39,7 @@ void RenderList::render(mat4 P, mat4 V) {
         object->render(P, V);
     }
 }
+
+size_t RenderList::size() {
+    return objects.size();
+}

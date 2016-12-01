@@ -85,6 +85,38 @@ struct gr_object_ud {
     RenderObject* object;
 };
 
+// Useful debug function
+void print_lua_stack(lua_State* L) {
+    int i;
+    int top = lua_gettop(L);
+
+    printf("total in stack %d\n",top);
+
+    for (i = 1; i <= top; i++)
+    {  /* repeat for each level */
+        int t = lua_type(L, i);
+        switch (t) {
+            case LUA_TSTRING:  /* strings */
+                printf("string: '%s'\n", lua_tostring(L, i));
+                break;
+            case LUA_TBOOLEAN:  /* booleans */
+                printf("boolean %s\n",lua_toboolean(L, i) ? "true" : "false");
+                break;
+            case LUA_TNUMBER:  /* numbers */
+                printf("number: %g\n", lua_tonumber(L, i));
+                break;
+            case LUA_TTABLE:
+                printf("table: %s\n", lua_tostring(L, i));
+                break;
+            default:  /* other values */
+                printf("%s\n", lua_typename(L, t));
+                break;
+        }
+        printf("  ");  /* put a separator */
+    }
+    printf("\n");  /* end the listing */
+}
+
 //// The "userdata" type for a node. Objects of this type will be
 //// allocated by Lua to represent nodes.
 //struct gr_node_ud {
@@ -517,16 +549,44 @@ extern "C"
 int gr_object_translate_cmd(lua_State* L) {
     GRLUA_DEBUG_CALL;
 
-    std::cout << "Translate" << std::endl;
+    gr_object_ud* selfdata = (gr_object_ud*)luaL_checkudata(L, 1, "gr.object");
+    luaL_argcheck(L, selfdata != 0, 1, "Object expected");
+
+    RenderObject* self = selfdata->object;
+
+    double values[3];
+
+    for (int i = 0; i < 3; i++) {
+        values[i] = luaL_checknumber(L, i + 2);
+    }
+
+    self->translate(glm::vec3(values[0], values[1], values[2]));
+
+    std::cout << "Translate: " << values[0] << " " << values[1] << " " << values[2] << std::endl;
 
     return 0;
 }
 
 extern "C"
 int gr_object_rotate_cmd(lua_State* L) {
-    GRLUA_DEBUG_CALL;
+    gr_object_ud* selfdata = (gr_object_ud*)luaL_checkudata(L, 1, "gr.object");
+    luaL_argcheck(L, selfdata != 0, 1, "Object expected");
 
-    std::cout << "rotate" << std::endl;
+    RenderObject* self = selfdata->object;
+
+    const char* axis_string = luaL_checkstring(L, 2);
+
+    luaL_argcheck(L, axis_string
+                     && std::strlen(axis_string) == 1, 2, "Single character expected");
+    char axis = std::tolower(axis_string[0]);
+
+    luaL_argcheck(L, axis >= 'x' && axis <= 'z', 2, "Axis must be x, y or z");
+
+    double angle = luaL_checknumber(L, 3);
+
+    self->rotate(axis, angle);
+
+    std::cout << "Rotate: " << axis << " " << angle << std::endl;
 
     return 0;
 }
@@ -535,7 +595,20 @@ extern "C"
 int gr_object_scale_cmd(lua_State* L) {
     GRLUA_DEBUG_CALL;
 
-    std::cout << "scale" << std::endl;
+    gr_object_ud* selfdata = (gr_object_ud*)luaL_checkudata(L, 1, "gr.object");
+    luaL_argcheck(L, selfdata != 0, 1, "Object expected");
+
+    RenderObject* self = selfdata->object;
+
+    double values[3];
+
+    for (int i = 0; i < 3; i++) {
+        values[i] = luaL_checknumber(L, i + 2);
+    }
+
+    self->scale(glm::vec3(values[0], values[1], values[2]));
+
+    std::cout << "Scale: " << values[0] << " " << values[1] << " " << values[2] << std::endl;
 
     return 0;
 }
@@ -544,7 +617,19 @@ extern "C"
 int gr_list_add_object_cmd(lua_State* L) {
     GRLUA_DEBUG_CALL;
 
-    std::cout << "add" << std::endl;
+    gr_list_ud* selfdata = (gr_list_ud*)luaL_checkudata(L, 1, "gr.list");
+    luaL_argcheck(L, selfdata != 0, 1, "List expected");
+
+    RenderList* self = selfdata->list;
+
+    gr_object_ud* childdata = (gr_object_ud*)luaL_checkudata(L, 2, "gr.object");
+    luaL_argcheck(L, childdata != 0, 2, "Object expected");
+
+    RenderObject* child = childdata->object;
+
+    self->addRenderObject(child);
+
+    std::cout << "Add Object" << std::endl;
 
     return 0;
 }
@@ -639,7 +724,7 @@ static const luaL_Reg grlib_list_methods[] = {
 
 // This function calls the lua interpreter to define the scene and
 // raytrace it as appropriate.
-bool run_lua(const std::string& filename)
+RenderList* run_lua(const std::string& filename)
 {
     GRLUA_DEBUG("Importing scene from " << filename);
 
@@ -676,17 +761,25 @@ bool run_lua(const std::string& filename)
 
     GRLUA_DEBUG("Parsing the scene");
     // Now parse the actual scene
-    if (luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 0, 0)) {
+    if (luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 1, 0)) {
         std::cerr << "Error loading " << filename << ": " << lua_tostring(L, -1) << std::endl;
-        return false;
+        return NULL;
     }
 
+    // Pull the returned list off the stack
+    gr_list_ud* data = (gr_list_ud*)luaL_checkudata(L, -1, "gr.list");
+    if (!data) {
+        std::cerr << "Error loading " << filename << ": Must return a list of objects." << std::endl;
+        return NULL;
+    }
 
+    // Store it
+    RenderList* list = data->list;
 
     GRLUA_DEBUG("Closing the interpreter");
 
     // Close the interpreter, free up any resources not needed
     lua_close(L);
 
-    return true;
+    return list;
 }

@@ -28,6 +28,8 @@ public:
 
     void init(std::map<ShaderType,ShaderProgram*> &shaders);
     void render(glm::mat4 P, glm::mat4 V);
+
+    size_t size();
 private:
     std::vector<RenderObject*> objects;
 };
