@@ -8,6 +8,13 @@
 #include "ShaderProgram.hpp"
 #include <glm/glm.hpp>
 
+enum class ShaderType {
+    UNIMPLEMENTED = 0, // Use this type for objects that shouldn't be rendered
+    PHUONG_TEXTURED = 1,
+    PHUONG_UNTEXTURED = 2,
+    CUSTOM = 3 // Use this type for objects that create their own specific shader
+};
+
 /*
  * A simple abstract class that is used to render an object
  * A sublass should take in a ShaderProgram and use it to render itself when render() is called
@@ -22,6 +29,9 @@ public:
 
     // Draw this object on screen
     virtual void render(glm::mat4 P, glm::mat4 V) = 0;
+
+    // Get the required shader type for this object
+    virtual ShaderType getShaderType();
 };
 
 

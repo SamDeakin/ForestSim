@@ -15,7 +15,11 @@ set(SOURCE_FILES
         src/Skybox.cpp
         src/Camera.cpp
         src/RenderObject.cpp
-        src/BasicGround.cpp)
+        src/BasicGround.cpp
+        src/scene_lua.cpp
+        src/RenderList.cpp
+        src/MeshObject.cpp
+        src/UntexturedMesh.cpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp

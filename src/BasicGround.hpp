@@ -17,6 +17,8 @@ public:
 
     virtual void init(ShaderProgram *program) override;
     virtual void render(glm::mat4 P, glm::mat4 V) override;
+
+    ShaderType getShaderType() override;
 private:
     glm::mat4 M;
 

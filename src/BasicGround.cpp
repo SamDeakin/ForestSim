@@ -118,3 +118,6 @@ void BasicGround::render(glm::mat4 P, glm::mat4 V) {
     CHECK_GL_ERRORS;
 }
 
+ShaderType BasicGround::getShaderType() {
+    return ShaderType::PHUONG_UNTEXTURED;
+}

@@ -6,3 +6,7 @@
 
 RenderObject::RenderObject() {}
 RenderObject::~RenderObject() {}
+
+ShaderType RenderObject::getShaderType() {
+    return ShaderType::UNIMPLEMENTED;
+}

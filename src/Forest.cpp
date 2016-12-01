@@ -178,7 +178,6 @@ bool Forest::mouseButtonInputEvent(int button, int actions, int mods) {
                     m_mouse2_held = false;
                     break;
             }
-
         }
     }
 

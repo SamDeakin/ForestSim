@@ -18,15 +18,14 @@ Interaction is as specified. The z, x and c buttons have also been made aliases 
     Ground
 4. Movement
     Finish
-1. Load objects in w/ LUA
 ###Wednesday
-1. Finish
+1. Load objects in w/ LUA
 4. Check move values, add shift
 6. Shading
-7. Shadow Mapping
 ###Thursday
 3. Variations
 5. Textures
+7. Shadow Mapping
 ###Friday
 10. FXAA
 ###Saturday
