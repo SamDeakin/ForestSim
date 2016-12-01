@@ -8,11 +8,15 @@
 #include "Skybox.hpp"
 #include "Camera.hpp"
 #include "BasicGround.hpp"
+#include "RenderList.hpp"
 
 class Forest : public Window {
 public:
     Forest();
     virtual ~Forest();
+
+    // Constructor to init with a scene of objects
+    Forest(RenderList *list);
 
 protected:
     virtual void init() override;
@@ -41,6 +45,9 @@ private:
     // Transforms
     glm::mat4 m_P();
     glm::mat4 m_V(); // Function to aggregate the parts of the V matrix
+
+    // Objects to be rendered
+    RenderList *list;
 
     // Movement interaction variables and functions
     double m_mousex;

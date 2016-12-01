@@ -18,8 +18,7 @@ set(SOURCE_FILES
         src/BasicGround.cpp
         src/scene_lua.cpp
         src/RenderList.cpp
-        src/MeshObject.cpp
-        src/UntexturedMesh.cpp)
+        src/MeshObject.cpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp
@@ -101,7 +100,7 @@ target_link_libraries(ForestSim lodepng)
 target_link_libraries(ForestSim imgui_impl)
 
 # Copy Assets on success
-add_custom_command(TARGET ForestSim POST_BUILD
+add_custom_command(TARGET ForestSim PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/Assets $<TARGET_FILE_DIR:ForestSim>/Assets)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/FragmentShader.glsl
@@ -122,3 +121,6 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/PhuongUntexturedFS.
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/PhuongUntexturedVS.glsl
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_SOURCE_DIR}/Assets/PhuongUntexturedVS.glsl $<TARGET_FILE_DIR:ForestSim>/Assets/PhuongUntexturedVS.glsl)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Assets/geometryForest.lua
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/Assets/geometryForest.lua $<TARGET_FILE_DIR:ForestSim>/Assets/geometryForest.lua)

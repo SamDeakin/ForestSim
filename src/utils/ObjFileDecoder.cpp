@@ -115,6 +115,16 @@ void ObjFileDecoder::decode(
                 uvCoords.push_back(temp_uvCoords[uvCoordIndexB]);
                 uvCoords.push_back(temp_uvCoords[uvCoordIndexC]);
 
+            } else if (numberOfIndexMatches == 1) {
+                // Line contains just vertices
+                // Get their positions and generate some face normals for them
+                sscanf(currentLine.c_str(), "f %d %d %d",
+                        &positionIndexA, &positionIndexB, &positionIndexC);
+
+                // Create some face normals for each vertex
+                vec3 norm = cross(temp_positions[positionIndexB - 1] - temp_positions[positionIndexA - 1], temp_positions[positionIndexC - 1] - temp_positions[positionIndexA - 1]);
+                temp_normals.push_back(norm);
+                normalIndexA = normalIndexB = normalIndexC = (temp_normals.size() - 1);
             } else {
                 // Line contains indices of the pattern vertex//normal.
                 sscanf(currentLine.c_str(), "f %d//%d %d//%d %d//%d",

@@ -658,9 +658,9 @@ int gr_object_cmd(lua_State* L) {
     data->object = 0;
 
     const char* mesh = luaL_checkstring(L, 1);
-    const lua_Number textured = luaL_checknumber(L, 2);
-    std::cout << "Loading object: " << mesh << " " << textured << std::endl;
-    data->object = MeshObject::MakeMeshObject(mesh, int(textured));
+    const lua_Number density = luaL_checknumber(L, 2);
+    std::cout << "Loading object: " << mesh << " " << density << std::endl;
+    data->object = new MeshObject(mesh, int(density));
 
     luaL_getmetatable(L, "gr.object");
     lua_setmetatable(L, -2);

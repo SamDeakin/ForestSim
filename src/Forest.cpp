@@ -1,6 +1,7 @@
 #include "Forest.hpp"
 
 #include "ShaderProgram.hpp"
+#include "RenderList.hpp"
 
 #include "OpenGLImport.hpp"
 
@@ -24,7 +25,15 @@ Forest::Forest() :
     // Empty
 }
 
-Forest::~Forest() {}
+Forest::~Forest() {
+    if (list) {
+        delete list;
+    }
+}
+
+Forest::Forest(RenderList *list) {
+    this->list = list;
+}
 
 void Forest::init() {
     // Set the background colour.
@@ -49,6 +58,12 @@ void Forest::init() {
     m_skybox.init();
     m_camera.init(m_framebufferWidth, m_framebufferHeight);
     m_ground.init(&m_phuong_untextured);
+
+    // Create shader list for rendered objects
+    // TODO
+
+    // Draw renderlist
+    // TODO
 }
 
 void Forest::appLogic() {
@@ -103,6 +118,10 @@ void Forest::draw() {
     m_skybox.render(P, V);
 
     m_ground.render(P, V);
+
+    if (list) {
+        list->render(P, V);
+    }
 }
 
 void Forest::cleanup() {

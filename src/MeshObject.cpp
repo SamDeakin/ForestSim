@@ -3,26 +3,49 @@
 //
 
 #include "MeshObject.hpp"
-#include "UntexturedMesh.hpp"
 #include "ObjFileDecoder.hpp"
+
+#include <iostream>
 
 using namespace std;
 using namespace glm;
 
-MeshObject::~MeshObject() {}
+MeshObject::MeshObject(string filepath, int density) {
+    this->filepath = string("Assets/") + filepath;
+    cout << this->filepath << endl;
+    this->loadMesh();
 
-MeshObject *MeshObject::MakeMeshObject(string objFile, int textured) {
-    string fullname = string("Assets/") + objFile;
+    this->density = density;
 
-    if (textured) {
-        return NULL;
-    } else {
-        return new UntexturedMesh(fullname);
-    }
+    // Check if this mesh is textured or untextured
+    // TODO
+    type = ShaderType::PHUONG_UNTEXTURED;
+
+    // Log
+    cout << "Loaded mesh: " << filepath << endl;
+    cout << "    Vertices: " << positions.size() << endl;
+    cout << "    Normals: " << normals.size() << endl;
+    cout << "    uvCoords: " << uvCoords.size() << endl;
 }
 
-MeshObject::MeshObject() {}
+MeshObject::~MeshObject() {}
 
 void MeshObject::loadMesh() {
     ObjFileDecoder::decode(filepath.c_str(), objectName, positions, normals, uvCoords);
+}
+
+void MeshObject::init(ShaderProgram *program) {
+    this->program = program;
+
+    // Init OpenGL objects
+    // TODO
+}
+
+void MeshObject::render(glm::mat4 P, glm::mat4 V) {
+    // Render the mesh
+    // TODO
+}
+
+ShaderType MeshObject::getShaderType() {
+    return type;
 }
