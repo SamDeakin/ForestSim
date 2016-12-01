@@ -8,6 +8,9 @@ Interaction is as specified. The z, x and c buttons have also been made aliases 
     Q - Quit
     R - Reset
 
+# Lua
+The lua functions for controlling the scene have been changed to being passed 3 arguments in place of a table in the specifications. This change is to save development time.
+
 #TODO
 ###Tuesday
 2. Skybox

@@ -22,18 +22,21 @@ Forest::Forest() :
     m_c_held(false),
     m_mouse1_held(false),
     m_mouse2_held(false),
-    m_mouse3_held(false) {
+    m_mouse3_held(false),
+    m_w_held(false),
+    m_a_held(false),
+    m_s_held(false),
+    m_d_held(false) {
     // Empty
 }
 
 Forest::~Forest() {
-    Forest();
     if (list) {
         delete list;
     }
 }
 
-Forest::Forest(RenderList *list) {
+Forest::Forest(RenderList *list) : Forest() {
     this->list = list;
 }
 
@@ -320,7 +323,7 @@ void Forest::rotateCamera(double dx, double dy) {
 }
 
 void Forest::walkCamera(double dx, double dy) {
-    m_camera.move(vec3(dx, 0.0f, -dy));
+    m_camera.move(vec3(dx, 0.0f, dy));
 }
 
 void Forest::zoomCamera(double dx) {
