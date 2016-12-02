@@ -18,7 +18,7 @@ set(SOURCE_FILES
         src/BasicGround.cpp
         src/scene_lua.cpp
         src/RenderList.cpp
-        src/MeshObject.cpp)
+        src/MeshObject.cpp src/Material.cpp src/Material.hpp src/Light.cpp src/Light.hpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp

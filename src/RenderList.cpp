@@ -34,9 +34,9 @@ void RenderList::init(std::map<ShaderType,ShaderProgram*> &shaders) {
     }
 }
 
-void RenderList::render(mat4 P, mat4 V) {
+void RenderList::render(mat4 P, mat4 V, Light &light) {
     for (auto object : objects) {
-        object->render(P, V);
+        object->render(P, V, light);
     }
 }
 

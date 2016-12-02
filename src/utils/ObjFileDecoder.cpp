@@ -5,6 +5,7 @@ using namespace glm;
 #include <sstream>
 #include <iostream>
 #include <cstring>
+#include <glm/gtx/string_cast.hpp>
 using namespace std;
 
 #include "Exception.hpp"
@@ -122,9 +123,9 @@ void ObjFileDecoder::decode(
                         &positionIndexA, &positionIndexB, &positionIndexC);
 
                 // Create some face normals for each vertex
-                vec3 norm = cross(temp_positions[positionIndexB - 1] - temp_positions[positionIndexA - 1], temp_positions[positionIndexC - 1] - temp_positions[positionIndexA - 1]);
+                vec3 norm = normalize(cross(temp_positions[positionIndexB - 1] - temp_positions[positionIndexA - 1], temp_positions[positionIndexC - 1] - temp_positions[positionIndexA - 1]));
                 temp_normals.push_back(norm);
-                normalIndexA = normalIndexB = normalIndexC = (temp_normals.size() - 1);
+                normalIndexA = normalIndexB = normalIndexC = temp_normals.size();
             } else {
                 // Line contains indices of the pattern vertex//normal.
                 sscanf(currentLine.c_str(), "f %d//%d %d//%d %d//%d",

@@ -71,6 +71,10 @@ void Forest::init() {
 
         list->init(shaders);
     }
+
+    light.ambientIntensity = 0.2f;
+    light.lightColour = vec3(0.7f, 0.7f, 0.7f);
+    light.lightDirection = normalize(vec3(1.0f, -1.0f, 0.5));
 }
 
 void Forest::appLogic() {
@@ -124,10 +128,13 @@ void Forest::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_skybox.render(P, V);
 
-//    m_ground.render(P, V);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    m_ground.render(P, V, light);
 
     if (list) {
-        list->render(P, V);
+        list->render(P, V, light);
     }
 }
 

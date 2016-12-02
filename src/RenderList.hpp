@@ -7,6 +7,7 @@
 
 #include "RenderObject.hpp"
 #include "ShaderProgram.hpp"
+#include "Light.hpp"
 
 #include <glm/glm.hpp>
 #include <map>
@@ -27,7 +28,7 @@ public:
     void addRenderObject(RenderObject *object);
 
     void init(std::map<ShaderType,ShaderProgram*> &shaders);
-    void render(glm::mat4 P, glm::mat4 V);
+    void render(glm::mat4 P, glm::mat4 V, Light &light);
 
     size_t size();
 private:

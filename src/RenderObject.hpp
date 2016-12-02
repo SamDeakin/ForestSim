@@ -6,6 +6,7 @@
 #define FORESTSIM_RENDEROBJECT_HPP
 
 #include "ShaderProgram.hpp"
+#include "Light.hpp"
 #include <glm/glm.hpp>
 
 enum class ShaderType {
@@ -28,7 +29,7 @@ public:
     virtual void init(ShaderProgram *program) = 0;
 
     // Draw this object on screen
-    virtual void render(glm::mat4 P, glm::mat4 V) = 0;
+    virtual void render(glm::mat4 P, glm::mat4 V, Light &light) = 0;
 
     // Get the required shader type for this object
     virtual ShaderType getShaderType();

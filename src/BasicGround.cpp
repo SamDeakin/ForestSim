@@ -51,6 +51,12 @@ void BasicGround::init(ShaderProgram *program) {
 
     m_uniform_P = program->getUniformLocation("P");
     m_uniform_V = program->getUniformLocation("V");
+    m_uniform_lightDirection = program->getUniformLocation("lightDirection");
+    m_uniform_lightColour = program->getUniformLocation("lightColour");
+    m_uniform_ambientIntensity = program->getUniformLocation("ambientIntensity");
+    m_uniform_material_kd = program->getUniformLocation("material.kd");
+    m_uniform_material_ks = program->getUniformLocation("material.ks");
+    m_uniform_material_shine = program->getUniformLocation("material.shininess");
 
     glGenVertexArrays(1, &m_VAO);
     // We could make this one call, but it's not
@@ -74,10 +80,14 @@ void BasicGround::init(ShaderProgram *program) {
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
 
     // Colour Buffer
-    glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(raw_colour), &raw_colour, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+//    glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(raw_colour), &raw_colour, GL_STATIC_DRAW);
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    // Now handled with a material
+    mat.kd = vec3(raw_colour[0], raw_colour[1], raw_colour[2]);
+    mat.ks = mat.kd;
+    mat.shininess = 20;
 
     // Model Transform
     mat4 modelTransform = glm::scale(mat4(1.0f), vec3(1000.0f, 1000.0f, 1000.0f));
@@ -101,13 +111,24 @@ void BasicGround::init(ShaderProgram *program) {
     CHECK_GL_ERRORS;
 }
 
-void BasicGround::render(glm::mat4 P, glm::mat4 V) {
+void BasicGround::render(glm::mat4 P, glm::mat4 V, Light &light) {
     program->enable();
 
     glBindVertexArray(m_VAO);
 
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
+
+    // Upload Light data
+    vec4 lightDirection = V * vec4(light.lightDirection, 0.0f);
+    glUniform3fv(m_uniform_lightDirection, 1, value_ptr(vec3(lightDirection)));
+    glUniform3fv(m_uniform_lightColour, 1, value_ptr(light.lightColour));
+    glUniform1f(m_uniform_ambientIntensity, light.ambientIntensity);
+
+    // Upload Material data
+    glUniform3fv(m_uniform_material_kd, 1, value_ptr(mat.kd));
+    glUniform3fv(m_uniform_material_ks, 1, value_ptr(mat.ks));
+    glUniform1f(m_uniform_material_shine, mat.shininess);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 1);
 

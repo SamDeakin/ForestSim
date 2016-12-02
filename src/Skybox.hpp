@@ -12,6 +12,7 @@
 
 #include "ShaderProgram.hpp"
 #include "OpenGLImport.hpp"
+#include "Light.hpp"
 
 class Skybox {
 public:

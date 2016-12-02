@@ -42,6 +42,12 @@ void MeshObject::init(ShaderProgram *program) {
     // Init OpenGL objects
     m_uniform_P = program->getUniformLocation("P");
     m_uniform_V = program->getUniformLocation("V");
+    m_uniform_lightDirection = program->getUniformLocation("lightDirection");
+    m_uniform_lightColour = program->getUniformLocation("lightColour");
+    m_uniform_ambientIntensity = program->getUniformLocation("ambientIntensity");
+    m_uniform_material_kd = program->getUniformLocation("material.kd");
+    m_uniform_material_ks = program->getUniformLocation("material.ks");
+    m_uniform_material_shine = program->getUniformLocation("material.shininess");
 
     glGenVertexArrays(1, &m_VAO);
     // We could make this one call, but it's not
@@ -67,16 +73,19 @@ void MeshObject::init(ShaderProgram *program) {
     if (type == ShaderType::PHUONG_UNTEXTURED) {
         // This is inefficient, but it has to be done
         vec3 colour = vec3(1.0f, 1.0f, 1.0f);
-        vec3 *col_arr = new vec3[positions.size()];
-        for (int i = 0; i < positions.size(); i++) {
-            col_arr[i] = colour;
-        }
+//        vec3 *col_arr = new vec3[positions.size()];
+//        for (int i = 0; i < positions.size(); i++) {
+//            col_arr[i] = colour;
+//        }
         // Colour Buffer
-        glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * positions.size(), col_arr, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-        delete[] col_arr;
+//        glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
+//        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * positions.size(), col_arr, GL_STATIC_DRAW);
+//        glEnableVertexAttribArray(0);
+//        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+//        delete[] col_arr;
+        mat.kd = colour;
+        mat.ks = colour;
+        mat.shininess = 10;
     }
 
     // Model Transform
@@ -100,7 +109,7 @@ void MeshObject::init(ShaderProgram *program) {
     CHECK_GL_ERRORS;
 }
 
-void MeshObject::render(glm::mat4 P, glm::mat4 V) {
+void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
     // Render the mesh
     program->enable();
 
@@ -108,6 +117,17 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V) {
 
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
+
+    // Upload Light info
+    vec4 lightDirection = V * vec4(light.lightDirection, 0.0f);
+    glUniform3fv(m_uniform_lightDirection, 1, value_ptr(vec3(lightDirection)));
+    glUniform3fv(m_uniform_lightColour, 1, value_ptr(light.lightColour));
+    glUniform1f(m_uniform_ambientIntensity, light.ambientIntensity);
+
+    // Upload Material info
+    glUniform3fv(m_uniform_material_kd, 1, value_ptr(mat.kd));
+    glUniform3fv(m_uniform_material_ks, 1, value_ptr(mat.ks));
+    glUniform1f(m_uniform_material_shine, mat.shininess);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, positions.size(), 1);
 

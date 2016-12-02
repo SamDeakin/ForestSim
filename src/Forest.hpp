@@ -9,6 +9,7 @@
 #include "Camera.hpp"
 #include "BasicGround.hpp"
 #include "RenderList.hpp"
+#include "Light.hpp"
 
 class Forest : public Window {
 public:
@@ -47,6 +48,7 @@ private:
     glm::mat4 m_V(); // Function to aggregate the parts of the V matrix
 
     // Objects to be rendered
+    Light light;
     RenderList *list;
 
     // Movement interaction variables and functions

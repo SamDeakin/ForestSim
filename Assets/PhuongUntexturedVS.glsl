@@ -1,6 +1,5 @@
 #version 330
 
-out vec4 vertexColour;
 out vec4 vertexNormal;
 out vec4 vertexPosition;
 
@@ -23,6 +22,5 @@ void main() {
     gl_Position = transform * vec4(position, 1.0);
 
     // Colour and normal to be interpolated across the surface
-    vertexColour = vec4(colour, 1.0);
-    vertexNormal = transpose(inverse(transform)) * vec4(normal, 0.0);
+    vertexNormal = normalize(transpose(inverse(halfTransform)) * vec4(normal, 0.0));
 }
