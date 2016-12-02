@@ -4,6 +4,7 @@
 #include "RenderList.hpp"
 
 #include "OpenGLImport.hpp"
+#include "GlErrorCheck.hpp"
 
 #include <imgui/imgui.h>
 #include <glm/glm.hpp>
@@ -12,9 +13,19 @@
 
 #include <iostream>
 #include <map>
+#include <GlErrorCheck.hpp>
 
 using namespace std;
 using namespace glm;
+
+const GLfloat raw_quad_vertices[] = {
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+};
 
 Forest::Forest() :
     m_z_held(false),
@@ -76,6 +87,55 @@ void Forest::init() {
     light.ambientIntensity = 0.2f;
     light.lightColour = vec3(1.0f, 1.0f, 1.0f);
     light.lightDirection = normalize(vec3(0.0f, -1.0f, 0.0));
+
+    // Initialize shaders and gl objects for extra rendering
+    m_quad_program.generateProgramObject();
+    m_quad_program.attachVertexShader(
+            getAssetFilePath("TextureRendererVS.glsl").c_str());
+    m_quad_program.attachFragmentShader(
+            getAssetFilePath("TextureRendererFS.glsl").c_str());
+    m_quad_program.link();
+    m_uniform_sceneTexture = m_quad_program.getUniformLocation("sceneTexture");
+
+    // Initialize the extra frame buffer
+    glGenFramebuffers(1, &m_scene_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_scene_FBO);
+
+    glGenTextures(1, &m_sceneTexture);
+    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    // TODO change these to filter better later
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glGenRenderbuffers(1, &m_depthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1920, 1080);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer);
+
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_sceneTexture, 0);
+
+    GLenum toBeDrawn = GL_COLOR_ATTACHMENT0;
+    glDrawBuffers(1, &toBeDrawn);
+
+    CHECK_GL_ERRORS;
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw "ERROR: Framebuffer created incorrectly";
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Create our quad to be rendered
+    // This should probably be in a class but fuck it
+    glGenVertexArrays(1, &m_quad_VAO);
+    glBindVertexArray(m_quad_VAO);
+
+    glGenBuffers(1, &m_quad_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_quad_VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(raw_quad_vertices), raw_quad_vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glBindVertexArray(0);
 }
 
 void Forest::appLogic() {
@@ -128,18 +188,38 @@ void Forest::draw() {
     mat4 P = m_P();
     mat4 V = m_V();
 
+    // First we draw to our FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, m_scene_FBO);
+    glViewport(0, 0, 1920, 1080);
+
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     m_skybox.render(P, V);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
 
     m_ground.render(P, V, light);
 
     if (list) {
         list->render(P, V, light);
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glDisable(GL_CULL_FACE);
+    // Now render to screen
+    m_quad_program.enable();
+    glBindVertexArray(m_quad_VAO);
+//    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
+    glUniform1i(m_uniform_sceneTexture, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    m_quad_program.disable();
 }
 
 void Forest::cleanup() {

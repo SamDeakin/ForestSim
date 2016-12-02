@@ -43,6 +43,15 @@ private:
     // Extra shaders
     ShaderProgram m_phuong_untextured;
 
+    // For rendering to FBO and then to screen in quad after
+    ShaderProgram m_quad_program;
+    GLuint m_scene_FBO;
+    GLuint m_sceneTexture;
+    GLuint m_depthBuffer;
+    GLint m_uniform_sceneTexture;
+    GLuint m_quad_VAO;
+    GLuint m_quad_VBO;
+
     // Transforms
     glm::mat4 m_P();
     glm::mat4 m_V(); // Function to aggregate the parts of the V matrix
