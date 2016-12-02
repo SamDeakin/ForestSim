@@ -92,7 +92,7 @@ void BasicGround::init(ShaderProgram *program) {
 
     // Model Transform
     // We basically want this plane to be inescapable
-    mat4 modelTransform = glm::scale(mat4(1.0f), vec3(100000.0f, 100000.0f, 100000.0f));
+    mat4 modelTransform = glm::scale(mat4(1.0f), vec3(10000.0f, 10000.0f, 10000.0f));
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(mat4), value_ptr(modelTransform), GL_STATIC_DRAW);
     glEnableVertexAttribArray(3);

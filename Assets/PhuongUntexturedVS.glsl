@@ -1,7 +1,7 @@
 #version 330
 
-out vec4 vertexNormal;
-out vec4 vertexPosition;
+out vec3 vertexNormal;
+out vec3 vertexPosition;
 
 layout(location = 0) in vec3 colour;
 layout(location = 1) in vec3 position;
@@ -16,12 +16,12 @@ uniform mat4 P;
 void main() {
     // For Phuong shading
     mat4 halfTransform = V * M * M_common;
-    vertexPosition = halfTransform * vec4(position, 1.0);
+    vertexPosition = normalize((halfTransform * vec4(position, 1.0)).xyz);
 
     // The actual screen-space position
     mat4 transform = P * halfTransform;
     gl_Position = transform * vec4(position, 1.0);
 
     // Colour and normal to be interpolated across the surface
-    vertexNormal = normalize(transpose(inverse(halfTransform)) * vec4(normal, 0.0));
+    vertexNormal = normalize((transpose(inverse(halfTransform)) * vec4(normal, 0.0)).xyz);
 }

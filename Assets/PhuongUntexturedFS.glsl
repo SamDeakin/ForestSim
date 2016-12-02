@@ -1,7 +1,7 @@
 #version 330
 
-in vec4 vertexNormal;
-in vec4 vertexPosition;
+in vec3 vertexNormal;
+in vec3 vertexPosition;
 
 out vec4 fragColour;
 
@@ -22,7 +22,7 @@ vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
     vec3 l = normalize(-lightDirection);
 
     // Direction from fragment to viewer (origin - fragPosition).
-    vec3 v = normalize(-fragPosition.xyz);
+    vec3 v = normalize(-fragPosition);
 
     vec3 normalizedNorm = normalize(fragNormal);
 
@@ -45,5 +45,5 @@ vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
 }
 
 void main() {
-	fragColour = vec4(phongModel(vertexPosition.xyz, vertexNormal.xyz) * lightColour, 1.0f);
+	fragColour = vec4(phongModel(vertexPosition, vertexNormal) * lightColour, 1.0f);
 }
