@@ -7,6 +7,9 @@
 #include "GlErrorCheck.hpp"
 
 #include <iostream>
+#include <random>
+#include <ctime>
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
@@ -39,9 +42,23 @@ void MeshObject::loadMesh() {
 void MeshObject::init(ShaderProgram *program) {
     this->program = program;
 
+    // Here we generate model transforms for all of our instances
+    // To hopefully make sure our random numbers are different
+    // Seeds are hard
+    // Two models with the same z on the first vector and number of vertices will still collide
+    mt19937 rng(time(NULL) * positions.size() * positions[0][2]);
+    uniform_real_distribution<float> gen(-1000, 1000);
+    for (int i = 0; i < density; i++) {
+        // For now, just generate that many instances w/ different model transforms
+        mat4 instance = mat4();
+        instance = glm::translate(instance, vec3(gen(rng), 0.0f, gen(rng)));
+        instances.push_back(instance);
+    }
+
     // Init OpenGL objects
     m_uniform_P = program->getUniformLocation("P");
     m_uniform_V = program->getUniformLocation("V");
+    m_uniform_M_common = program->getUniformLocation("M_common");
     m_uniform_lightDirection = program->getUniformLocation("lightDirection");
     m_uniform_lightColour = program->getUniformLocation("lightColour");
     m_uniform_ambientIntensity = program->getUniformLocation("ambientIntensity");
@@ -90,7 +107,7 @@ void MeshObject::init(ShaderProgram *program) {
 
     // Model Transform
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mat4), value_ptr(M), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * instances.size(), instances.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
@@ -117,6 +134,7 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
 
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
+    glUniformMatrix4fv(m_uniform_M_common, 1, GL_FALSE, value_ptr(M));
 
     // Upload Light info
     vec4 lightDirection = V * vec4(light.lightDirection, 0.0f);
@@ -129,7 +147,7 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
     glUniform3fv(m_uniform_material_ks, 1, value_ptr(mat.ks));
     glUniform1f(m_uniform_material_shine, mat.shininess);
 
-    glDrawArraysInstanced(GL_TRIANGLES, 0, positions.size(), 1);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, positions.size(), instances.size());
 
     glBindVertexArray(0);
 

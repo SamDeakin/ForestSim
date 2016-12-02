@@ -165,11 +165,6 @@ bool Forest::mouseMoveEvent(double xPos, double yPos) {
     double dx = m_mousex - xPos;
     double dy = m_mousey - yPos;
 
-    if (m_shift_held) {
-        dx *= 10;
-        dy *= 10;
-    }
-
     if (mouse1_held()) {
         // Nothing for now
     }
@@ -179,7 +174,11 @@ bool Forest::mouseMoveEvent(double xPos, double yPos) {
     }
 
     if (mouse3_held()) {
-        moveCamera(dx, dy);
+        if (m_shift_held) {
+            moveCamera(dx * 10, dy * 10);
+        } else {
+            moveCamera(dx, dy);
+        }
     }
 
     // Do this after so interaction functions have access to new and old coordinates

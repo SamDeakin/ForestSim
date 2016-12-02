@@ -9,12 +9,13 @@ layout(location = 2) in vec3 normal;
 // Note M takes up 4 positions
 layout(location = 3) in mat4 M;
 
+uniform mat4 M_common;
 uniform mat4 V;
 uniform mat4 P;
 
 void main() {
     // For Phuong shading
-    mat4 halfTransform = V * M;
+    mat4 halfTransform = V * M * M_common;
     vertexPosition = halfTransform * vec4(position, 1.0);
 
     // The actual screen-space position

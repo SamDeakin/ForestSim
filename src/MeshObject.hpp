@@ -28,6 +28,7 @@ protected:
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> uvCoords;
+    std::vector<glm::mat4> instances; // Model transforms for separate instances
 
     int density;
 private:
@@ -36,6 +37,7 @@ private:
 
     GLint m_uniform_P;
     GLint m_uniform_V;
+    GLint m_uniform_M_common;
     GLint m_uniform_lightDirection;
     GLint m_uniform_lightColour;
     GLint m_uniform_ambientIntensity;

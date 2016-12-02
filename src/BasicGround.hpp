@@ -27,6 +27,7 @@ private:
     ShaderProgram *program;
     GLint m_uniform_P;
     GLint m_uniform_V;
+    GLint m_uniform_M_common;
     GLint m_uniform_lightDirection;
     GLint m_uniform_lightColour;
     GLint m_uniform_ambientIntensity;

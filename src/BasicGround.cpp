@@ -51,6 +51,7 @@ void BasicGround::init(ShaderProgram *program) {
 
     m_uniform_P = program->getUniformLocation("P");
     m_uniform_V = program->getUniformLocation("V");
+    m_uniform_M_common = program->getUniformLocation("M_common");
     m_uniform_lightDirection = program->getUniformLocation("lightDirection");
     m_uniform_lightColour = program->getUniformLocation("lightColour");
     m_uniform_ambientIntensity = program->getUniformLocation("ambientIntensity");
@@ -90,7 +91,8 @@ void BasicGround::init(ShaderProgram *program) {
     mat.shininess = 20;
 
     // Model Transform
-    mat4 modelTransform = glm::scale(mat4(1.0f), vec3(1000.0f, 1000.0f, 1000.0f));
+    // We basically want this plane to be inescapable
+    mat4 modelTransform = glm::scale(mat4(1.0f), vec3(100000.0f, 100000.0f, 100000.0f));
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(mat4), value_ptr(modelTransform), GL_STATIC_DRAW);
     glEnableVertexAttribArray(3);
@@ -118,6 +120,10 @@ void BasicGround::render(glm::mat4 P, glm::mat4 V, Light &light) {
 
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
+
+    // This one is only needed because instanced models also use this shader
+    mat4 M_common = mat4();
+    glUniformMatrix4fv(m_uniform_M_common, 1, GL_FALSE, value_ptr(M_common));
 
     // Upload Light data
     vec4 lightDirection = V * vec4(light.lightDirection, 0.0f);
