@@ -85,7 +85,7 @@ void MeshObject::init(ShaderProgram *program) {
 //        delete[] col_arr;
         mat.kd = colour;
         mat.ks = colour;
-        mat.shininess = 10;
+        mat.shininess = 100;
     }
 
     // Model Transform

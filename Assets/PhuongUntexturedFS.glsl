@@ -19,12 +19,14 @@ uniform Material material;
 
 vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
     // Direction from fragment to light source.
-    vec3 l = -lightDirection;
+    vec3 l = normalize(-lightDirection);
 
     // Direction from fragment to viewer (origin - fragPosition).
     vec3 v = normalize(-fragPosition.xyz);
 
-    float n_dot_l = max(dot(fragNormal, l), 0.0);
+    vec3 normalizedNorm = normalize(fragNormal);
+
+    float n_dot_l = max(dot(normalizedNorm, l), 0.0);
 
 	vec3 diffuse;
 	diffuse = material.kd * n_dot_l;
@@ -34,7 +36,7 @@ vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
     if (n_dot_l > 0.0) {
 		// Halfway vector.
 		vec3 h = normalize(v + l);
-        float n_dot_h = max(dot(fragNormal, h), 0.0);
+        float n_dot_h = max(dot(normalizedNorm, h), 0.0);
 
         specular = material.ks * pow(n_dot_h, material.shininess);
     }

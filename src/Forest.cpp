@@ -73,8 +73,8 @@ void Forest::init() {
     }
 
     light.ambientIntensity = 0.2f;
-    light.lightColour = vec3(0.7f, 0.7f, 0.7f);
-    light.lightDirection = normalize(vec3(1.0f, -1.0f, 0.5));
+    light.lightColour = vec3(1.0f, 1.0f, 1.0f);
+    light.lightDirection = normalize(vec3(0.0f, -1.0f, 0.0));
 }
 
 void Forest::appLogic() {
