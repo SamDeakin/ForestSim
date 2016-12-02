@@ -38,3 +38,7 @@ void RenderObject::scale(glm::vec3 amount) {
 void RenderObject::translate(glm::vec3 amount) {
     M = glm::translate(M, amount);
 }
+
+// These are so subclasses can respond if needed
+void RenderObject::setScaleVariance(glm::vec3 variance) {}
+void RenderObject::setRotationVariance(glm::vec3 min, glm::vec3 max) {}

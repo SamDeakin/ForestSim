@@ -31,6 +31,10 @@ MeshObject::MeshObject(string filepath, int density) {
     cout << "    Vertices: " << positions.size() << endl;
     cout << "    Normals: " << normals.size() << endl;
     cout << "    uvCoords: " << uvCoords.size() << endl;
+
+    max_scale = vec3(1.0f);
+    min_rot = vec3(0.0f);
+    max_rot = vec3(0.0f);
 }
 
 MeshObject::~MeshObject() {}
@@ -47,11 +51,31 @@ void MeshObject::init(ShaderProgram *program) {
     // Seeds are hard
     // Two models with the same z on the first vector and number of vertices will still collide
     mt19937 rng(time(NULL) * positions.size() * positions[0][2]);
-    uniform_real_distribution<float> gen(-1000, 1000);
+    uniform_real_distribution<float> positionrng(-1000, 1000);
+    uniform_real_distribution<float> scalerng(1, max_scale.x);
+//    uniform_real_distribution<float> rotxrng(min_rot.x, max_rot.x);
+    uniform_real_distribution<float> rotyrng(min_rot.y, max_rot.y);
+//    uniform_real_distribution<float> rotzrng(min_rot.z, max_rot.z);
     for (int i = 0; i < density; i++) {
-        // For now, just generate that many instances w/ different model transforms
+        // Just generate that many instances w/ different model transforms
         mat4 instance = mat4();
-        instance = glm::translate(instance, vec3(gen(rng), 0.0f, gen(rng)));
+
+        // Change rotation
+        // We allow separate rotations like this
+        quat rotation = quat();
+//        rotation = glm::rotate(rotation, rotxrng(rng), vec3(1.0f, 0.0f, 0.0f));
+        rotation = glm::rotate(rotation, rotyrng(rng), vec3(0.0f, 1.0f, 0.0f));
+//        rotation = glm::rotate(rotation, rotzrng(rng), vec3(0.0f, 0.0f, 1.0f));
+        instance = mat4_cast(rotation) * instance;
+
+        // Change position
+        instance = glm::translate(instance, vec3(positionrng(rng), 0.0f, positionrng(rng)));
+
+        // Change scale
+        // Changing each dimension separately would be weird, so we just do once for all
+        float scaleFactor = scalerng(rng);
+        instance = glm::scale(instance, vec3(scaleFactor));
+
         instances.push_back(instance);
     }
 
@@ -157,3 +181,13 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
 ShaderType MeshObject::getShaderType() {
     return type;
 }
+
+void MeshObject::setScaleVariance(glm::vec3 variance) {
+    max_scale = variance;
+}
+
+void MeshObject::setRotationVariance(glm::vec3 min, glm::vec3 max) {
+    min_rot = min;
+    max_rot = max;
+}
+

@@ -20,6 +20,8 @@ public:
     virtual void render(glm::mat4 P, glm::mat4 V, Light &light) override;
     virtual ShaderType getShaderType() override;
 
+    void setScaleVariance(glm::vec3 variance) override;
+    void setRotationVariance(glm::vec3 min, glm::vec3 max) override;
 protected:
     // Populates the object attributes
     void loadMesh();
@@ -31,6 +33,9 @@ protected:
     std::vector<glm::mat4> instances; // Model transforms for separate instances
 
     int density;
+    glm::vec3 max_scale;
+    glm::vec3 min_rot;
+    glm::vec3 max_rot;
 private:
     ShaderProgram *program;
     ShaderType type;

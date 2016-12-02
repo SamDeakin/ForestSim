@@ -40,6 +40,9 @@ public:
     void scale(glm::vec3 amount);
     void translate(glm::vec3 amount);
 
+    // Functions for setting variations of objects
+    virtual void setScaleVariance(glm::vec3 variance);
+    virtual void setRotationVariance(glm::vec3 min, glm::vec3 max);
 protected:
     glm::mat4 M;
 };

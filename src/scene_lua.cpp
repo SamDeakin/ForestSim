@@ -47,6 +47,7 @@
 #include <map>
 
 #include <lua-5.3.1/src/lua.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 //typedef std::map<std::string,Mesh*> MeshMap;
 //static MeshMap mesh_map;
@@ -693,6 +694,51 @@ int gr_object_gc_cmd(lua_State* L) {
     return 0;
 }
 
+extern "C"
+int gr_object_set_scale_var(lua_State* L) {
+    GRLUA_DEBUG_CALL;
+
+    gr_object_ud* selfdata = (gr_object_ud*)luaL_checkudata(L, 1, "gr.object");
+    luaL_argcheck(L, selfdata != 0, 1, "Object expected");
+
+    RenderObject* self = selfdata->object;
+
+    glm::vec3 values;
+
+    for (int i = 0; i < 3; i++) {
+        values[i] = luaL_checknumber(L, i + 2);
+    }
+
+    self->setScaleVariance(values);
+    std::cout << "Set Scale Variance: " << glm::to_string(values) << std::endl;
+
+    return 0;
+}
+
+extern "C"
+int gr_object_set_rot_var(lua_State* L) {
+    GRLUA_DEBUG_CALL;
+
+    gr_object_ud* selfdata = (gr_object_ud*)luaL_checkudata(L, 1, "gr.object");
+    luaL_argcheck(L, selfdata != 0, 1, "Object expected");
+
+    RenderObject* self = selfdata->object;
+
+    glm::vec3 min, max;
+
+    for (int i = 0; i < 3; i++) {
+        min[i] = luaL_checknumber(L, i + 2);
+    }
+    for (int i = 0; i < 3; i++) {
+        max[i] = luaL_checknumber(L, i + 5);
+    }
+
+    self->setRotationVariance(min, max);
+    std::cout << "Set Rot Variance: " << glm::to_string(min) << " " << glm::to_string(max) << std::endl;
+
+    return 0;
+}
+
 // This is where all the "global" functions in our library are
 // declared.
 // If you want to add a new non-member function, add it here.
@@ -712,6 +758,8 @@ static const luaL_Reg grlib_object_methods[] = {
         {"translate", gr_object_translate_cmd},
         {"rotate", gr_object_rotate_cmd},
         {"scale", gr_object_scale_cmd},
+        {"set_scale_variance", gr_object_set_scale_var},
+        {"set_rot_variance", gr_object_set_rot_var},
         {0, 0}
 };
 
