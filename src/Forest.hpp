@@ -61,6 +61,7 @@ private:
     bool m_d_held;
     void walkCamera(double dx, double dy);
 
+    bool m_shift_held;
     void zoomCamera(double dx);
 
     bool mouse1_held();

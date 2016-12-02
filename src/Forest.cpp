@@ -26,7 +26,8 @@ Forest::Forest() :
     m_w_held(false),
     m_a_held(false),
     m_s_held(false),
-    m_d_held(false) {
+    m_d_held(false),
+    m_shift_held(false) {
     // Empty
 }
 
@@ -81,6 +82,9 @@ void Forest::appLogic() {
     double dx = 0;
     double dy = 0;
     double speed = 1.0;
+    if (m_shift_held) {
+        speed = 10.0;
+    }
 
     if (m_w_held) {
         dy += speed;
@@ -152,7 +156,7 @@ mat4 Forest::m_V() {
 
 //-- Virtual callback methods
 bool Forest::cursorEnterWindowEvent(int entered) {
-
+    return false;
 }
 
 bool Forest::mouseMoveEvent(double xPos, double yPos) {
@@ -160,6 +164,11 @@ bool Forest::mouseMoveEvent(double xPos, double yPos) {
 
     double dx = m_mousex - xPos;
     double dy = m_mousey - yPos;
+
+    if (m_shift_held) {
+        dx *= 10;
+        dy *= 10;
+    }
 
     if (mouse1_held()) {
         // Nothing for now
@@ -220,6 +229,10 @@ bool Forest::mouseButtonInputEvent(int button, int actions, int mods) {
 bool Forest::mouseScrollEvent(double xOffSet, double yOffSet) {
     bool eventHandled(false);
 
+    if (m_shift_held) {
+        yOffSet *= 10;
+    }
+
     zoomCamera(yOffSet);
     eventHandled = true;
 
@@ -272,6 +285,11 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 m_d_held = true;
                 eventHandled = true;
                 break;
+            case GLFW_KEY_LEFT_SHIFT:
+            case GLFW_KEY_RIGHT_SHIFT:
+                m_shift_held = true;
+                eventHandled = true;
+                break;
             default:
                 break;
         }
@@ -303,6 +321,11 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_D:
                 m_d_held = false;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_LEFT_SHIFT:
+            case GLFW_KEY_RIGHT_SHIFT:
+                m_shift_held = false;
                 eventHandled = true;
                 break;
             default:
