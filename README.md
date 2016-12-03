@@ -1,5 +1,13 @@
 # Compilation:
 Use CMAKE. Good luck
+jk, run these commands
+
+First run cmake to generate the build directory and makefile like this:
+```cmake cmake-build-debug```
+
+Now cd into the ```cmake-build-debug``` directory and run make to execute the makefile.
+
+Running from here should be like ```./ForestSim Assets/<Script>```
 
 # Running
 This was built to work in 1080p. Other resolutions will get weird, so don't resize the window or try it on a smaller screen.
