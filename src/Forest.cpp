@@ -183,7 +183,7 @@ void Forest::draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     if (m_FXAA_enabled) {
-        m_FXAA_renderer.render(m_sceneTexture, 1);
+        m_FXAA_renderer.render(m_sceneTexture, 3);
     } else {
         m_quadRenderer.render(m_sceneTexture);
     }

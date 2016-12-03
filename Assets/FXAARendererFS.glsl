@@ -12,6 +12,7 @@ const float horizontalOffset = 0.000521;
 
 // Tuning values
 float EDGE_THRESHOLD = 0.2;
+uint SEARCH_STEPS = 4u;
 
 // Take a sample from a at offset distance from our pixel
 vec3 getColourOffset(vec2 original, vec2 offset) {
@@ -62,5 +63,41 @@ void main() {
             fragColour = vec4(1.0, 0.0, 0.0, 1.0);
             return;
         }
+
+        // Test 4 corners
+        vec3 NWColour = getColourOffset(uv, vec2(-1, -1));
+        vec3 SEColour = getColourOffset(uv, vec2(1, 1));
+        vec3 NEColour = getColourOffset(uv, vec2(1, -1));
+        vec3 SWColour = getColourOffset(uv, vec2(-1, 1));
+        float NWLum = luminance(NWColour);
+        float SELum = luminance(SEColour);
+        float NELum = luminance(NEColour);
+        float SWLum = luminance(SWColour);
+
+        // Add subpixel aliasing test
+        // TODO
+
+        // Test if edge is verticle or horizontal
+        // We basically just take a weighted sum these all to figure out which direction we are closer to
+        float vertical =
+            abs((0.25 * NWLum) + (-0.5 * northLum) + (0.25 * NELum)) +
+            abs((0.50 * westLum) + (-1.0 * centreLum) + (0.5 * eastLum)) +
+            abs((0.25 * SWLum) + (-0.5 * southLum) + (0.25 * SELum));
+        float horizontal =
+            abs((0.25 * NWLum) + (-0.5 * westLum) + (0.25 * SWLum)) +
+            abs((0.50 * northLum) + (-1.0 * centreLum) + (0.5 * southLum)) +
+            abs((0.25 * NELum) + (-0.5 * eastLum) + (0.25 * SELum));
+
+        if (renderMode == 2) {
+            // Render Mode 2 shows which edges are which orientation
+            if (vertical > horizontal) {
+                fragColour = vec4(1.0, 0.0, 1.0, 1.0);
+            } else {
+                fragColour = vec4(1.0, 1.0, 0.0, 1.0);
+            }
+            return;
+        }
+
+        // Find end of edge
     }
 }
