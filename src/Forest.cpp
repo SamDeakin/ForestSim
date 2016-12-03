@@ -18,15 +18,6 @@
 using namespace std;
 using namespace glm;
 
-const GLfloat raw_quad_vertices[] = {
-        -1.0f, -1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,
-};
-
 Forest::Forest() :
     m_z_held(false),
     m_x_held(false),
@@ -88,15 +79,6 @@ void Forest::init() {
     light.lightColour = vec3(1.0f, 1.0f, 1.0f);
     light.lightDirection = normalize(vec3(0.0f, -1.0f, 0.0));
 
-    // Initialize shaders and gl objects for extra rendering
-    m_quad_program.generateProgramObject();
-    m_quad_program.attachVertexShader(
-            getAssetFilePath("TextureRendererVS.glsl").c_str());
-    m_quad_program.attachFragmentShader(
-            getAssetFilePath("TextureRendererFS.glsl").c_str());
-    m_quad_program.link();
-    m_uniform_sceneTexture = m_quad_program.getUniformLocation("sceneTexture");
-
     // Initialize the extra frame buffer
     glGenFramebuffers(1, &m_scene_FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, m_scene_FBO);
@@ -124,18 +106,7 @@ void Forest::init() {
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // Create our quad to be rendered
-    // This should probably be in a class but fuck it
-    glGenVertexArrays(1, &m_quad_VAO);
-    glBindVertexArray(m_quad_VAO);
-
-    glGenBuffers(1, &m_quad_VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_quad_VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(raw_quad_vertices), raw_quad_vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    glBindVertexArray(0);
+    m_quadRenderer.init();
 }
 
 void Forest::appLogic() {
@@ -209,17 +180,7 @@ void Forest::draw() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glDisable(GL_CULL_FACE);
-    // Now render to screen
-    m_quad_program.enable();
-    glBindVertexArray(m_quad_VAO);
-//    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
-    glUniform1i(m_uniform_sceneTexture, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-    m_quad_program.disable();
+    m_quadRenderer.render(m_sceneTexture);
 }
 
 void Forest::cleanup() {
