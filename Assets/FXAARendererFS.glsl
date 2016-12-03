@@ -107,9 +107,6 @@ void main() {
             northLum = westLum;
             southLum = eastLum;
             offset = vec2(0.0, verticalOffset);
-        }
-
-        if (vertical > horizontal) {
             positionB.y += stepLength * 0.5;
         } else {
             positionB.x += stepLength * 0.5;

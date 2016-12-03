@@ -34,7 +34,6 @@ Rotations in x and z-axes are even more difficult. The model must contain the po
 7. Shadow Mapping
 9. Crepuscular Rays
 8. SSAO
-10. Tune FXAA to find that harsh edge bug
 11. Make good scene
 
 #Credits for assets:
