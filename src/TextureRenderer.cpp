@@ -23,6 +23,10 @@ void TextureRenderer::init() {
     m_quad_program.link();
     m_uniform_sceneTexture = m_quad_program.getUniformLocation("sceneTexture");
 
+    initQuadObject();
+}
+
+void TextureRenderer::initQuadObject() {
     // Create our quad to be rendered
     // This should probably be in a class but fuck it
     glGenVertexArrays(1, &m_quad_VAO);

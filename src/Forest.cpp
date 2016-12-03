@@ -29,7 +29,8 @@ Forest::Forest() :
     m_a_held(false),
     m_s_held(false),
     m_d_held(false),
-    m_shift_held(false) {
+    m_shift_held(false),
+    m_FXAA_enabled(true) {
     // Empty
 }
 
@@ -107,6 +108,7 @@ void Forest::init() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     m_quadRenderer.init();
+    m_FXAA_renderer.init();
 }
 
 void Forest::appLogic() {
@@ -180,7 +182,11 @@ void Forest::draw() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    m_quadRenderer.render(m_sceneTexture);
+    if (m_FXAA_enabled) {
+        m_FXAA_renderer.render(m_sceneTexture, 0);
+    } else {
+        m_quadRenderer.render(m_sceneTexture);
+    }
 }
 
 void Forest::cleanup() {
@@ -323,6 +329,10 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_D:
                 m_d_held = true;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_F:
+                m_FXAA_enabled = !m_FXAA_enabled;
                 eventHandled = true;
                 break;
             case GLFW_KEY_LEFT_SHIFT:

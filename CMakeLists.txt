@@ -21,7 +21,8 @@ set(SOURCE_FILES
         src/MeshObject.cpp
         src/Material.cpp
         src/Light.cpp
-        src/TextureRenderer.cpp)
+        src/TextureRenderer.cpp
+        src/FXAARenderer.cpp)
 set(UTIL_SRC
         src/utils/GlErrorCheck.cpp
         src/utils/MeshConsolidator.cpp

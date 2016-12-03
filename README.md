@@ -1,16 +1,22 @@
 # Compilation:
 Use CMAKE. Good luck
 
+# Running
+This was built to work in 1080p. Other resolutions will get weird, so don't resize the window or try it on a smaller screen.
+
 # Interaction
 Interaction is as specified. The z, x and c buttons have also been made aliases of the 3 mouse buttons.
 
 # Extra keys:
     Q - Quit
     R - Reset
+    F - Enable/Disable FXAA
 
 # Lua
 The lua functions for controlling the scene have been changed to being passed 3 arguments in place of a table in the specifications. This change is to save development time.
+
 Note that getting models to work with the random rotation and scaling is really hard. To work with scaling and y-axis rotation, they have to lie with the plane of x=0, z=0 cutting through the model. Otherwise the random movements make them fly everywhere.
+
 Rotations in x and z-axes are even more difficult. The model must contain the point {0,0,0} inside it. I'm too lazy to perfect each model like that, and I only plan on using y-axis rotations anyways, so I've disabled them.
 
 #TODO

@@ -10,8 +10,8 @@
 #include "BasicGround.hpp"
 #include "RenderList.hpp"
 #include "Light.hpp"
-
 #include "TextureRenderer.hpp"
+#include "FXAARenderer.hpp"
 
 class Forest : public Window {
 public:
@@ -44,6 +44,7 @@ private:
 
     // Extra shaders
     ShaderProgram m_phuong_untextured;
+    FXAARenderer m_FXAA_renderer;
 
     // For rendering to FBO and then to screen in quad after
     GLuint m_scene_FBO;
@@ -88,4 +89,6 @@ private:
     void moveCamera(double dx, double dy);
 
     void resetPosition();
+
+    bool m_FXAA_enabled;
 };

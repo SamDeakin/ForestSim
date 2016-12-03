@@ -17,6 +17,8 @@ public:
 
     std::string getAssetFilePath(std::string file);
 protected:
+    void initQuadObject();
+
     ShaderProgram m_quad_program;
     GLint m_uniform_sceneTexture;
     GLuint m_quad_VAO;
