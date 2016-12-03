@@ -12,6 +12,8 @@ const float horizontalOffset = 0.000521;
 
 // Tuning values
 float EDGE_THRESHOLD = 0.1;
+float SEARCH_THRESHOLD = 0.3;
+int MAX_STEPS = 8;
 
 // Take a sample from a at offset distance from our pixel
 vec3 getColourOffset(vec2 original, vec2 offset) {
@@ -107,9 +109,6 @@ void main() {
             northLum = westLum;
             southLum = eastLum;
             offset = vec2(0.0, verticalOffset);
-            positionB.y += stepLength * 0.5;
-        } else {
-            positionB.x += stepLength * 0.5;
         }
 
         // Here are the positive and negative positions we will sample from
@@ -128,14 +127,38 @@ void main() {
             return;
         }
 
-        // RenderMode 4 and up signifies full quality
-        // Take another step and sample again
+        // RenderMode 4 signifies full quality
+        // Take steps and sample again
         positionNegative = positionNegative - offset;
         positionPositive = positionPositive + offset;
         vec3 colour3 = texture(sceneTexture, positionPositive).xyz;
         vec3 colour4 = texture(sceneTexture, positionNegative).xyz;
+        vec3 iter2 = iter1 * (MAX_STEPS + 1) + (colour3 + colour4) * (MAX_STEPS);
+        int total = MAX_STEPS + 1 + MAX_STEPS * 2;
+        // We step until we find a much darker pixel
+        float lum3 = luminance(colour3);
+        float lum4 = luminance(colour4);
+        float iterLum = luminance(iter2);
+        bool done = abs(iterLum - lum3) > SEARCH_THRESHOLD ||  abs(iterLum - lum4) > SEARCH_THRESHOLD;
 
-        vec3 iter2 = iter1 * 0.75 + colour3 * 0.125 + colour4 * 0.125;
-        fragColour = vec4(iter2, 1.0);
+        // Loop
+        for (int i = 0; i < MAX_STEPS; i++) {
+            if (!done) {
+                positionNegative = positionNegative - offset;
+                positionPositive = positionPositive + offset;
+                colour3 = texture(sceneTexture, positionPositive).xyz;
+                colour4 = texture(sceneTexture, positionNegative).xyz;
+                iter1 = iter2;
+                iter2 = (iter1 * (MAX_STEPS - i + 1))  + (colour3 + colour4) * (MAX_STEPS - i);
+                total = total + (MAX_STEPS - i + 1) + (MAX_STEPS - i) * 2;
+                // We step until we find a much darker pixel
+                lum3 = luminance(colour3);
+                lum4 = luminance(colour4);
+                iterLum = luminance(iter2);
+                done = abs(iterLum - lum3) > SEARCH_THRESHOLD ||  abs(iterLum - lum4) > SEARCH_THRESHOLD;
+            }
+        }
+
+        fragColour = vec4(iter2 / total, 1.0);
     }
 }
