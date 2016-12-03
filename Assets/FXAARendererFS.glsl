@@ -121,7 +121,6 @@ void main() {
         vec3 colour1 = texture(sceneTexture, positionPositive).xyz;
         vec3 colour2 = texture(sceneTexture, positionNegative).xyz;
         vec3 iter1 = colour1 * 0.25 + colour2 * 0.25 + centreColour * 0.5;
-//        iter1 *= 1.0 / 3.0;
 
         if (renderMode == 3) {
             // RenderMode 3 is the early exit with just one step
