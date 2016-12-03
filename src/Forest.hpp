@@ -91,4 +91,5 @@ private:
     void resetPosition();
 
     bool m_FXAA_enabled;
+    GLint m_FXAA_renderMode;
 };

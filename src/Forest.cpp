@@ -30,7 +30,8 @@ Forest::Forest() :
     m_s_held(false),
     m_d_held(false),
     m_shift_held(false),
-    m_FXAA_enabled(true) {
+    m_FXAA_enabled(true),
+    m_FXAA_renderMode(3) {
     // Empty
 }
 
@@ -153,6 +154,13 @@ void Forest::guiLogic() {
         glfwSetWindowShouldClose(m_window, GL_TRUE);
     }
 
+    ImGui::InputInt("FXAA debug setting", &m_FXAA_renderMode, 1, 1);
+    if (m_FXAA_renderMode > 4) {
+        m_FXAA_renderMode = 4;
+    } else if (m_FXAA_renderMode < 0) {
+        m_FXAA_renderMode = 0;
+    }
+
     ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
     ImGui::End();
 }
@@ -183,7 +191,7 @@ void Forest::draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     if (m_FXAA_enabled) {
-        m_FXAA_renderer.render(m_sceneTexture, 3);
+        m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);
     } else {
         m_quadRenderer.render(m_sceneTexture);
     }
@@ -333,6 +341,14 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_F:
                 m_FXAA_enabled = !m_FXAA_enabled;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_EQUAL:
+                m_FXAA_renderMode++;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_MINUS:
+                m_FXAA_renderMode--;
                 eventHandled = true;
                 break;
             case GLFW_KEY_LEFT_SHIFT:

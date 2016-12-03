@@ -11,6 +11,7 @@ Interaction is as specified. The z, x and c buttons have also been made aliases 
     Q - Quit
     R - Reset
     F - Enable/Disable FXAA
+    +/- - Adjust FXAA render mode
 
 # Lua
 The lua functions for controlling the scene have been changed to being passed 3 arguments in place of a table in the specifications. This change is to save development time.
@@ -20,29 +21,12 @@ Note that getting models to work with the random rotation and scaling is really 
 Rotations in x and z-axes are even more difficult. The model must contain the point {0,0,0} inside it. I'm too lazy to perfect each model like that, and I only plan on using y-axis rotations anyways, so I've disabled them.
 
 #TODO
-###Tuesday
-2. Skybox
-    Skybox
-4. Movement
-    Rotation
-2. Skybox
-    Ground
-4. Movement
-    Finish
-###Wednesday
-1. Load objects in w/ LUA
-4. Check move values, add shift
-6. Shading
-###Thursday
-3. Variations
 5. Textures
 7. Shadow Mapping
-###Friday
-10. FXAA
-###Saturday
 9. Crepuscular Rays
-###Sunday
 8. SSAO
+10. Tune FXAA to find that harsh edge bug
+11. Make good scene
 
 #Credits for assets:
     SkyboxSet1 is from Heiko Irrgang, https://93i.de/p/free-skybox-texture-set/
