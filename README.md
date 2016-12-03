@@ -1,5 +1,6 @@
 # Compilation:
-Use CMAKE. Good luck
+Use CMAKE. Good luck!
+
 jk, run these commands
 
 First run cmake to generate the build directory and makefile like this:
