@@ -1,0 +1,77 @@
+\documentclass[10pt]{article}
+%\usepackage{helvetica}
+\usepackage{hyperref}
+
+\begin{document}
+	
+	\begin{center}
+		\large\bf Manual
+	\end{center}
+	
+	\begin{center}
+		\bf Running
+	\end{center}
+	
+	The program takes one argument, a lua script to display. The program assumes that the lua script is present and correct, and that all objects it points to are also within spec.
+	
+	\begin{center}
+		\bf Lua
+	\end{center}
+	The lua scripts can contain these functions:
+	\begin{itemize}
+		\item $gr.make_list()$ - Create a list object. The script must return a list object at the end.
+		\item $gr.make_object(obj, density)$ - Create a mesh object. Object is a .obj file inside the Assets directory. Density is the relative density of the object in the scene. Name has been removed because there isn't really a use built into the program for using it.
+		
+		\item $list:add_object(object)$ - Add an object to a list
+		
+		\item $object:translate(x, y, z)$ - Translates the model transform
+		\item $object:rotate(axis, amount)$ - Rotates the model transform
+		\item $object:scale(x, y, z)$ - Scales the model transform
+		
+		\item $object:set_scale_variance(x, y, z)$ - Set the model scale variance
+		\item $object:set_rot_variance(x1, y1, z1, x2, y2, z2)$ - Set the model rotation variance
+	\end{itemize}
+	
+	\begin{center}
+		\bf Movement
+	\end{center}
+	The camera can be controlled with the mouse and keyboard. Holding shift moves twice as fast but doesn't change rotation speed.
+	
+	\begin{itemize}
+		\item Holding the right mouse button or the C key and moving the mouse rotates the camera.
+		\item Holding the middle mouse button, the X key, or mouse button 4 and moving the mouse will drag the camera. This changes the position along the up/down and left/right vectors.
+		\item Holding any of the W/A/S/D keys moves the camera along the forward/backward and left/right vectors.
+		\item Scrolling the mouse wheel moves the camera forward and backward.
+	\end{itemize}
+	
+	\begin{center}
+		\bf Extra keys
+	\end{center}
+	Many extra keys can perform extra functionality like toggling features. Most of the implemented features can be toggled on and off. Here is an explanation of what the extra keys do.
+	
+	\begin{itemize}
+		\item B - Toggle skybox
+		\item F - Toggle FXAA
+		\item M - Toggle shadows
+		\item N - Show the shadow texture. This draws the shadow depth pass to the screen
+		\item Q - Close the program
+		\item R - Reset the camera position
+		\item +/- - Adjust the FXAA render mode. An explanation of modes is below
+	\end{itemize}
+	
+	\begin{center}
+		\bf FXAA Render Modes
+	\end{center}
+	
+	Modes range from 0 to 4.
+	
+	Render Mode 0 is like toggling FXAA off.
+	
+	Mode 1 shows the edge detection step. Edges that will be blurred are drawn red.
+	
+	Mode 2 shows the edge orientation step. Edges are coloured yellow or purple depending on their detected orientation of horizontal or vertical.
+	
+	Mode 3 shows one step of the searching and blurring algorithm. I find this looks best so it is the default.
+	
+	Mode 4 lets the algorithm continue to search until it is satisfied. I find this decreases the sharpness of the image a lot.
+\end{document}

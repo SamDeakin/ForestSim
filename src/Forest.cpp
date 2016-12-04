@@ -264,7 +264,17 @@ void Forest::draw() {
     if (!m_show_shadow) {
         // Second we draw to our FBO
         glBindFramebuffer(GL_FRAMEBUFFER, m_scene_FBO);
+
+        // Note this call is pretty buggy
         glViewport(0, 0, 1920, 1080);
+
+        // Something like this isn't enough to fix it
+        // This is why 1080p is the only supported resolution
+//        if (m_framebufferWidth == 1920) {
+//            glViewport(0, 0, 1920, 1080);
+//        } else {
+//            glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
+//        }
 
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

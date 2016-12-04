@@ -10,6 +10,11 @@ using namespace std;
 
 int main(int argc, char **argv) {
     string script = "Assets/geometryForest.lua";
+
+    if (argc > 1) {
+        script = argv[1];
+    }
+
     RenderList* list = run_lua(script);
 
     cout << "Returned size: " << list->size() << endl;

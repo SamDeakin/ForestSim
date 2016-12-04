@@ -10,3 +10,9 @@ cmake-build-debug
 # That one lua build file
 shared/lua-5.3.1/src/lua
 shared/lua-5.3.1/src/luac
+
+# Latex build files
+*.aux
+*.log
+*.out
+*.synctex.gz
