@@ -51,6 +51,7 @@ private:
     GLuint m_scene_FBO;
     GLuint m_sceneTexture;
     GLuint m_depthBuffer;
+    GLuint m_lowestDepthTexture;
     TextureRenderer m_quadRenderer;
 
     // For rendering shadow to extra FBO

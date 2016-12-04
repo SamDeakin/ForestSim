@@ -21,7 +21,7 @@
 using namespace std;
 using namespace glm;
 
-#define DEPTH_TEXTURE_SIZE 8192
+#define DEPTH_TEXTURE_SIZE 16384
 
 Forest::Forest() :
     m_z_held(false),
@@ -80,7 +80,7 @@ void Forest::init() {
     light.ambientIntensity = 0.2f;
     light.lightColour = vec3(1.0f, 1.0f, 1.0f);
     light.lightDirection = normalize(vec3(0.0f, -1.0f, -1.0f));
-    m_P_light = glm::ortho(-1500.0f, 1500.0f, -1500.0f, 1500.0f, -500.0f, 2500.0f);
+    m_P_light = glm::ortho(-1500.0f, 1500.0f, -1500.0f, 2750.0f, -500.0f, 3500.0f);
     m_V_light = glm::lookAt(-light.lightDirection * 1000.0f, vec3(0.0f), vec3(0.0f, 1.0f, 0.0f));
     m_to_tex = glm::mat4(
             0.5f, 0.0f, 0.0f, 0.0f,
@@ -143,7 +143,7 @@ void Forest::init() {
 
     glGenTextures(1, &m_shadow_tex);
     glBindTexture(GL_TEXTURE_2D, m_shadow_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -151,7 +151,6 @@ void Forest::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 
-//    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadow_tex, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadow_tex, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
@@ -161,6 +160,24 @@ void Forest::init() {
         throw "ERROR: Framebuffer created incorrectly";
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Generate our lowest depth value texture
+    glGenTextures(1, &m_lowestDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, m_lowestDepthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1, 1, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+
+    // Set that one pixel to -1;
+    float pixels = 1;
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &pixels);
+    CHECK_GL_ERRORS;
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     m_quadRenderer.init();
     m_FXAA_renderer.init();
@@ -252,16 +269,23 @@ void Forest::draw() {
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_skybox.render(P, V);
+        if (m_skybox_enabled) {
+            m_skybox.render(P, V);
+        }
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
 
-        m_ground.render(P, V, light, bias_P_V_shadow, m_shadow_tex);
+        GLuint shadow_texture = m_shadow_tex;
+        if (!m_shadow_enabled) {
+            shadow_texture = m_lowestDepthTexture;
+        }
+
+        m_ground.render(P, V, light, bias_P_V_shadow, shadow_texture);
 
         if (list) {
-            list->render(P, V, light, bias_P_V_shadow, m_shadow_tex);
+            list->render(P, V, light, bias_P_V_shadow, shadow_texture);
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
