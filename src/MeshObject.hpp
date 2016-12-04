@@ -17,7 +17,8 @@ public:
     virtual ~MeshObject();
 
     virtual void init(ShaderProgram *program) override;
-    virtual void render(glm::mat4 P, glm::mat4 V, Light &light) override;
+    virtual void render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadowMat, GLuint shadowTexture) override;
+    virtual void renderForDepth(GLint uniform_M_common) override;
     virtual ShaderType getShaderType() override;
 
     void setScaleVariance(glm::vec3 variance) override;
@@ -49,6 +50,8 @@ private:
     GLint m_uniform_material_kd;
     GLint m_uniform_material_ks;
     GLint m_uniform_material_shine;
+    GLint m_uniform_shadowMatrix;
+    GLint m_uniform_shadowTexture;
 
     GLuint m_VAO;
     GLuint m_VBO;

@@ -58,6 +58,8 @@ void BasicGround::init(ShaderProgram *program) {
     m_uniform_material_kd = program->getUniformLocation("material.kd");
     m_uniform_material_ks = program->getUniformLocation("material.ks");
     m_uniform_material_shine = program->getUniformLocation("material.shininess");
+    m_uniform_shadowMatrix = program->getUniformLocation("bias_P_V_shadow");
+    m_uniform_shadowTexture = program->getUniformLocation("shadow");
 
     glGenVertexArrays(1, &m_VAO);
     // We could make this one call, but it's not
@@ -71,14 +73,14 @@ void BasicGround::init(ShaderProgram *program) {
     // Vertex Buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, &raw_vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
 
     // Normal Buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_NBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(raw_normals), &raw_normals, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
 
     // Colour Buffer
 //    glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
@@ -95,31 +97,38 @@ void BasicGround::init(ShaderProgram *program) {
     mat4 modelTransform = glm::scale(mat4(1.0f), vec3(10000.0f, 10000.0f, 10000.0f));
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(mat4), value_ptr(modelTransform), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
-    glEnableVertexAttribArray(5);
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 0 * 4));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 1 * 4));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 2 * 4));
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 3 * 4));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 0 * 4));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 1 * 4));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 2 * 4));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 3 * 4));
+    glVertexAttribDivisor(1, 1);
+    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
 
     glBindVertexArray(0);
 
     CHECK_GL_ERRORS;
 }
 
-void BasicGround::render(glm::mat4 P, glm::mat4 V, Light &light) {
+void BasicGround::render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadowMat, GLuint shadowTexture) {
     program->enable();
 
     glBindVertexArray(m_VAO);
 
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
+    glUniformMatrix4fv(m_uniform_shadowMatrix, 1, GL_FALSE, value_ptr(shadowMat));
+
+    // Bind the texture
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, shadowTexture);
+    glBindTexture(GL_TEXTURE2, shadowTexture);
+    glUniform1i(m_uniform_shadowTexture, 2);
 
     // This one is only needed because instanced models also use this shader
     mat4 M_common = mat4();
@@ -143,6 +152,15 @@ void BasicGround::render(glm::mat4 P, glm::mat4 V, Light &light) {
     program->disable();
 
     CHECK_GL_ERRORS;
+}
+
+void BasicGround::renderForDepth(GLint uniform_M_common) {
+    glBindVertexArray(m_VAO);
+
+    mat4 M_common = mat4();
+    glUniformMatrix4fv(m_uniform_M_common, 1, GL_FALSE, value_ptr(M_common));
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 1);
+    glBindVertexArray(0);
 }
 
 ShaderType BasicGround::getShaderType() {

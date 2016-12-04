@@ -45,12 +45,20 @@ private:
     // Extra shaders
     ShaderProgram m_phuong_untextured;
     FXAARenderer m_FXAA_renderer;
+    ShaderProgram m_depth_only;
 
     // For rendering to FBO and then to screen in quad after
     GLuint m_scene_FBO;
     GLuint m_sceneTexture;
     GLuint m_depthBuffer;
     TextureRenderer m_quadRenderer;
+
+    // For rendering shadow to extra FBO
+    GLuint m_shadow_FBO;
+    GLuint m_shadow_tex;
+    GLint m_uniform_shadow_M_common;
+    GLint m_uniform_shadow_P;
+    GLint m_uniform_shadow_V;
 
     // Transforms
     glm::mat4 m_P();
@@ -92,4 +100,12 @@ private:
 
     bool m_FXAA_enabled;
     GLint m_FXAA_renderMode;
+
+    bool m_skybox_enabled;
+
+    bool m_shadow_enabled;
+    bool m_show_shadow;
+    glm::mat4 m_to_tex;
+    glm::mat4 m_P_light;
+    glm::mat4 m_V_light;
 };

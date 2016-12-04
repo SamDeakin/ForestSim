@@ -2,6 +2,7 @@
 
 in vec3 vertexNormal;
 in vec3 vertexPosition;
+in vec4 shadowPosition;
 
 out vec4 fragColour;
 
@@ -16,6 +17,9 @@ struct Material {
     float shininess;
 };
 uniform Material material;
+uniform sampler2DShadow shadow;
+
+const float SHADOW_SAMPLE_BIAS = 0.005;
 
 vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
     // Direction from fragment to light source.
@@ -41,9 +45,12 @@ vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
         specular = material.ks * pow(n_dot_h, material.shininess);
     }
 
-    return ambientIntensity + (diffuse + specular);
+    return diffuse + specular;
 }
 
 void main() {
-	fragColour = vec4(phongModel(vertexPosition, vertexNormal) * lightColour, 1.0f);
+    vec3 phongColour = phongModel(vertexPosition, vertexNormal) * lightColour;
+    float shade = texture(shadow, vec3(shadowPosition.xy, shadowPosition.z - SHADOW_SAMPLE_BIAS / shadowPosition.w));
+
+    fragColour = vec4(phongColour * shade + ambientIntensity * lightColour, 1.0f);
 }

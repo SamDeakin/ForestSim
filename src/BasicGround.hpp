@@ -18,7 +18,8 @@ public:
     virtual ~BasicGround();
 
     virtual void init(ShaderProgram *program) override;
-    virtual void render(glm::mat4 P, glm::mat4 V, Light &light) override;
+    virtual void render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadowMat, GLuint shadowTexture) override;
+    void renderForDepth(GLint uniform_M_common) override;
 
     ShaderType getShaderType() override;
 private:
@@ -34,6 +35,8 @@ private:
     GLint m_uniform_material_kd;
     GLint m_uniform_material_ks;
     GLint m_uniform_material_shine;
+    GLint m_uniform_shadowMatrix;
+    GLint m_uniform_shadowTexture;
 
     GLuint m_VAO;
     GLuint m_VBO;

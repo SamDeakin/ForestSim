@@ -34,9 +34,15 @@ void RenderList::init(std::map<ShaderType,ShaderProgram*> &shaders) {
     }
 }
 
-void RenderList::render(mat4 P, mat4 V, Light &light) {
+void RenderList::render(mat4 P, mat4 V, Light &light, glm::mat4 shadowMat, GLuint shadowTexture) {
     for (auto object : objects) {
-        object->render(P, V, light);
+        object->render(P, V, light, shadowMat, shadowTexture);
+    }
+}
+
+void RenderList::renderForDepth(GLint uniform_M_common) {
+    for (auto object : objects) {
+        object->renderForDepth(uniform_M_common);
     }
 }
 

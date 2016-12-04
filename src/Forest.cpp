@@ -10,13 +10,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <iostream>
 #include <map>
 #include <GlErrorCheck.hpp>
+#include <OpenGL/OpenGL.h>
 
 using namespace std;
 using namespace glm;
+
+#define DEPTH_TEXTURE_SIZE 8192
 
 Forest::Forest() :
     m_z_held(false),
@@ -31,7 +36,10 @@ Forest::Forest() :
     m_d_held(false),
     m_shift_held(false),
     m_FXAA_enabled(true),
-    m_FXAA_renderMode(3) {
+    m_FXAA_renderMode(3),
+    m_skybox_enabled(true),
+    m_shadow_enabled(true),
+    m_show_shadow(false) {
     // Empty
 }
 
@@ -69,6 +77,29 @@ void Forest::init() {
     m_camera.init(m_framebufferWidth, m_framebufferHeight);
     m_ground.init(&m_phuong_untextured);
 
+    light.ambientIntensity = 0.2f;
+    light.lightColour = vec3(1.0f, 1.0f, 1.0f);
+    light.lightDirection = normalize(vec3(0.0f, -1.0f, -1.0f));
+    m_P_light = glm::ortho(-1500.0f, 1500.0f, -1500.0f, 1500.0f, -500.0f, 2500.0f);
+    m_V_light = glm::lookAt(-light.lightDirection * 1000.0f, vec3(0.0f), vec3(0.0f, 1.0f, 0.0f));
+    m_to_tex = glm::mat4(
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f
+    );
+
+    // Initialize our shadow shader
+    m_depth_only.generateProgramObject();
+    m_depth_only.attachVertexShader(
+            getAssetFilePath("DepthOnlyVS.glsl").c_str());
+    m_depth_only.attachFragmentShader(
+            getAssetFilePath("DepthOnlyFS.glsl").c_str());
+    m_depth_only.link();
+    m_uniform_shadow_M_common = m_depth_only.getUniformLocation("M_common");
+    m_uniform_shadow_V = m_depth_only.getUniformLocation("V");
+    m_uniform_shadow_P = m_depth_only.getUniformLocation("P");
+
     if (list) {
         // Create shader list for rendered objects
         map<ShaderType,ShaderProgram*> shaders;
@@ -76,10 +107,6 @@ void Forest::init() {
 
         list->init(shaders);
     }
-
-    light.ambientIntensity = 0.2f;
-    light.lightColour = vec3(1.0f, 1.0f, 1.0f);
-    light.lightDirection = normalize(vec3(0.0f, -1.0f, 0.0));
 
     // Initialize the extra frame buffer
     glGenFramebuffers(1, &m_scene_FBO);
@@ -91,6 +118,8 @@ void Forest::init() {
     // TODO change these to filter better later
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenRenderbuffers(1, &m_depthBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
@@ -101,6 +130,31 @@ void Forest::init() {
 
     GLenum toBeDrawn = GL_COLOR_ATTACHMENT0;
     glDrawBuffers(1, &toBeDrawn);
+
+    CHECK_GL_ERRORS;
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw "ERROR: Framebuffer created incorrectly";
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Initialize the shadow render buffer stuff
+    glGenFramebuffers(1, &m_shadow_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_shadow_FBO);
+
+    glGenTextures(1, &m_shadow_tex);
+    glBindTexture(GL_TEXTURE_2D, m_shadow_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+
+//    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadow_tex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadow_tex, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
 
     CHECK_GL_ERRORS;
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -161,39 +215,62 @@ void Forest::guiLogic() {
         m_FXAA_renderMode = 0;
     }
 
-    ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
+    ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
     ImGui::End();
 }
 
 void Forest::draw() {
     mat4 P = m_P();
     mat4 V = m_V();
-
-    // First we draw to our FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, m_scene_FBO);
-    glViewport(0, 0, 1920, 1080);
+    mat4 bias_P_V_shadow = m_to_tex * m_P_light * m_V_light;
 
     glEnable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_skybox.render(P, V);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glEnable(GL_DEPTH_TEST);
-
-    m_ground.render(P, V, light);
-
-    if (list) {
-        list->render(P, V, light);
+    // First we draw to our shadow FBO
+    // Bind the FBO
+    if (!m_show_shadow) {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_shadow_FBO);
+        glViewport(0, 0, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE);
+        glClear(GL_DEPTH_BUFFER_BIT);
     }
+    m_depth_only.enable();
+    // Upload our uniforms
+    glUniformMatrix4fv(m_uniform_shadow_P, 1, GL_FALSE, value_ptr(m_P_light));
+    glUniformMatrix4fv(m_uniform_shadow_V, 1, GL_FALSE, value_ptr(m_V_light));
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    m_ground.renderForDepth(m_uniform_shadow_M_common);
+    if (list) {
+        list->renderForDepth(m_uniform_shadow_M_common);
+    }
+    m_depth_only.disable();
 
-    if (m_FXAA_enabled) {
-        m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);
-    } else {
-        m_quadRenderer.render(m_sceneTexture);
+    if (!m_show_shadow) {
+        // Second we draw to our FBO
+        glBindFramebuffer(GL_FRAMEBUFFER, m_scene_FBO);
+        glViewport(0, 0, 1920, 1080);
+
+        glEnable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_skybox.render(P, V);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glEnable(GL_DEPTH_TEST);
+
+        m_ground.render(P, V, light, bias_P_V_shadow, m_shadow_tex);
+
+        if (list) {
+            list->render(P, V, light, bias_P_V_shadow, m_shadow_tex);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if (m_FXAA_enabled) {
+            m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);
+        } else {
+            m_quadRenderer.render(m_sceneTexture);
+        }
     }
 }
 
@@ -349,6 +426,18 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_MINUS:
                 m_FXAA_renderMode--;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_B:
+                m_skybox_enabled = !m_skybox_enabled;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_M:
+                m_shadow_enabled = !m_shadow_enabled;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_N:
+                m_show_shadow = !m_show_shadow;
                 eventHandled = true;
                 break;
             case GLFW_KEY_LEFT_SHIFT:

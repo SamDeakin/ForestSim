@@ -28,7 +28,8 @@ public:
     void addRenderObject(RenderObject *object);
 
     void init(std::map<ShaderType,ShaderProgram*> &shaders);
-    void render(glm::mat4 P, glm::mat4 V, Light &light);
+    void render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadowMat, GLuint shadowTexture);
+    void renderForDepth(GLint uniform_M_common);
 
     size_t size();
 private:

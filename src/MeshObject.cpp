@@ -89,6 +89,8 @@ void MeshObject::init(ShaderProgram *program) {
     m_uniform_material_kd = program->getUniformLocation("material.kd");
     m_uniform_material_ks = program->getUniformLocation("material.ks");
     m_uniform_material_shine = program->getUniformLocation("material.shininess");
+    m_uniform_shadowMatrix = program->getUniformLocation("bias_P_V_shadow");
+    m_uniform_shadowTexture = program->getUniformLocation("shadow");
 
     glGenVertexArrays(1, &m_VAO);
     // We could make this one call, but it's not
@@ -102,14 +104,14 @@ void MeshObject::init(ShaderProgram *program) {
     // Vertex Buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * positions.size(), &positions[0], GL_STATIC_DRAW);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
 
     // Normal Buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_NBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * normals.size(), &normals[0], GL_STATIC_DRAW);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
 
     if (type == ShaderType::PHUONG_UNTEXTURED) {
         // This is inefficient, but it has to be done
@@ -132,25 +134,25 @@ void MeshObject::init(ShaderProgram *program) {
     // Model Transform
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * instances.size(), instances.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
-    glEnableVertexAttribArray(5);
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 0 * 4));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 1 * 4));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 2 * 4));
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 3 * 4));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 0 * 4));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 1 * 4));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 2 * 4));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (const GLvoid*)(sizeof(GLfloat) * 3 * 4));
+    glVertexAttribDivisor(1, 1);
+    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
 
     glBindVertexArray(0);
 
     CHECK_GL_ERRORS;
 }
 
-void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
+void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadowMat, GLuint shadowTexture) {
     // Render the mesh
     program->enable();
 
@@ -159,6 +161,13 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
     glUniformMatrix4fv(m_uniform_M_common, 1, GL_FALSE, value_ptr(M));
+    glUniformMatrix4fv(m_uniform_shadowMatrix, 1, GL_FALSE, value_ptr(shadowMat));
+
+    // Bind the texture
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, shadowTexture);
+    glBindTexture(GL_TEXTURE2, shadowTexture);
+    glUniform1i(m_uniform_shadowTexture, 2);
 
     // Upload Light info
     vec4 lightDirection = V * vec4(light.lightDirection, 0.0f);
@@ -176,6 +185,14 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light) {
     glBindVertexArray(0);
 
     program->disable();
+}
+
+void MeshObject::renderForDepth(GLint uniform_M_common) {
+    // Skip all the extra colour and shader setup steps, just upload M and draw
+    glUniformMatrix4fv(uniform_M_common, 1, GL_FALSE, value_ptr(M));
+    glBindVertexArray(m_VAO);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, positions.size(), instances.size());
+    glBindVertexArray(0);
 }
 
 ShaderType MeshObject::getShaderType() {
