@@ -22,7 +22,7 @@
 	
 	I found this took a lot of time, but worked fairly immediately when it was done. The only issue I encountered was with taking tables as an argument. I couldn't figure out how to index into a table to retrieve values, so I changed the functions to take three arguments in place of a table. It looks less clean and readable in the script, but saved development time and doesn't change functionality. This is all in a file of the same name under the src/ directory.
 	
-	I had to modify the file $ObjFileDecoder.cpp$ because I found it failed for many obj files that weren't quite up to spec but otherwise correct.
+	I had to modify the file $ObjFileDecoder.cpp$ because I found it failed for many obj files that weren't quite up to spec but otherwise correct. One example of something I had to add is handling for object files that use negative indices to specify faces.
 	
 	The actual generation of permutations of objects takes place in $MeshObject::init$ inside the file $src/MeshObject.cpp$. We generate permutations by creating a separate model transform and translating it a random amount along the x and z axes. We do this to permute the objects location through the scene. We don't move through the y axis because that would make the object float or sink into the ground.
 	
@@ -77,6 +77,18 @@
 	\begin{center}
 		\bf Shadow Mapping / objective 7
 	\end{center}
+	
+	
+	
+	I had a lot of trouble for this objective actually binding the depth texture correctly for both drawing and reading. It took far longer than I thought it would to get that part working. After I had that part it was maybe 30 minutes of tuning to get it to it's present quality.
+	
+	Initially there was a lot of "shadow acne" or banding artifacts where the shadows would band in the lit areas. I was able to eliminate this by adding a bias that shifts the found depth. This effectively sets a minimum value and rounds all values below it to count as not occluded. This solves the shadow acne problem but raises another.
+	
+	The next problem is left unsolved. Because we could values below the bias as not occluded, there are situations where an object is too close to the object that is shading it, and appears as not in a shadow. This is sometimes called Peter Panning online. I didn't have an easy resolution to this. It could be reduced by using thicker models, increasing the depth granularity, or taking multiple samples of the depth buffer to give soft shadows in these areas.
+
+	The implementation of shadows is mostly inside the Forest object, sorry :/. The Forest keeps a depth texture and a framebuffer. It calls RenderForDepth() on each child object, which is essentially just a simpler form of their render() method. It would have been much better if RenderObjects didn't have their own shaders, and instead had methods broken up to do things like upload uniforms and actually draw. This lack of granularity in methods forced me to create a method just for rendering depth to screen.
+	
+	The shadow test can be seen in the Phong shaders' main methods. The vertex shader has to transform the coordinates into shadow coordinates. The fragment shader then takes these and uses the OpenGL sampler2DShadow texture sampler to sample. This method returns 0 if the object is behind the shadow, so I then multiply the light value from Phong shading by it to essentially turn it off.
 	
 	\begin{center}
 		\bf Ambient Occlusion / objective 8
