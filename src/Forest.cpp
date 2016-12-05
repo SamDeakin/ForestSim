@@ -65,13 +65,21 @@ void Forest::init() {
             getAssetFilePath("FragmentShader.glsl").c_str());
     m_shader.link();
 
-    // Create the Phuong shader for untextured models
+    // Create the Phong shader for untextured models
     m_phuong_untextured.generateProgramObject();
     m_phuong_untextured.attachVertexShader(
             getAssetFilePath("PhuongUntexturedVS.glsl").c_str());
     m_phuong_untextured.attachFragmentShader(
             getAssetFilePath("PhuongUntexturedFS.glsl").c_str());
     m_phuong_untextured.link();
+
+    // Now for textured models
+    m_phong_textured.generateProgramObject();
+    m_phong_textured.attachVertexShader(
+            getAssetFilePath("PhongTexturedVS.glsl").c_str());
+    m_phong_textured.attachFragmentShader(
+            getAssetFilePath("PhongTexturedFS.glsl").c_str());
+    m_phong_textured.link();
 
     m_skybox.init();
     m_camera.init(m_framebufferWidth, m_framebufferHeight);
@@ -104,6 +112,7 @@ void Forest::init() {
         // Create shader list for rendered objects
         map<ShaderType,ShaderProgram*> shaders;
         shaders.insert(pair<ShaderType,ShaderProgram*>(ShaderType::PHUONG_UNTEXTURED, &m_phuong_untextured));
+        shaders.insert(pair<ShaderType,ShaderProgram*>(ShaderType::PHUONG_TEXTURED, &m_phong_textured));
 
         list->init(shaders);
     }

@@ -68,9 +68,11 @@
 		\bf Texture Mapping / objective 5
 	\end{center}
 	
-	I had to make huge changes to the $ObjFileDecoder$ to accomplish this objective. I basically made it handle deciding everything related to material too. It opens referenced mtl files and also returns info on which parts of a model should be shaded with what material.
+	I had to make huge changes to the $ObjFileDecoder$ to accomplish this objective. I basically made it handle deciding everything related to material too. It opens referenced mtl files and also returns info on which parts of a model should be shaded with what material. I decided to support a subset of the options inside .mtl files. I support loading Kd, Ks, shininess, and mapping Kd to a texture. I don't think it would have taken much more to add support for bump mapping, Ks mapping, shininess mapping, alpha mapping, or really any other kind of uv-mapping, I just didn't have time to do so.
 	
-	I implemented this after Phong Shading (objective 6), and it also required that materials be calculated per-vertex. This is because many of the obj files had multiple materials for each object. It also required that I actually do something with the uv coordinates, previously I was just ignoring them.
+	I implemented this after Phong Shading (objective 6), and it also required that materials be calculated per-vertex. This is because many of the obj files had multiple materials for each object, so I had to save the material for each vertex. It also required that I actually do something with the uv coordinates, previously I was just ignoring them.
+	
+	Texture mapping isn't toggleable, because of the way it was designed. I have instead included scripts that don't use texture mapping. The script $LowPoly.lua$ is the best example of a script that doesn't use texture mapping. $LowPolyTexture.lua$ is it's counterpart that does and achieves the same feel.
 	
 	\begin{center}
 		\bf Phong Shading / objective 6

@@ -11,6 +11,7 @@
 #include <ctime>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <lodepng/lodepng.h>
 
 using namespace std;
 using namespace glm;
@@ -36,7 +37,7 @@ MeshObject::MeshObject(string filepath, int density) {
 MeshObject::~MeshObject() {}
 
 void MeshObject::loadMesh() {
-    bool textured = ObjFileDecoder::decode(filepath.c_str(), objectName, positions, normals, uvCoords, m_texture, Kd, Ks, Ns);
+    bool textured = ObjFileDecoder::decode(filepath.c_str(), objectName, positions, normals, uvCoords, m_textureFile, Kd, Ks, Ns);
 
     if (textured) {
         type = ShaderType::PHUONG_TEXTURED;
@@ -99,6 +100,7 @@ void MeshObject::init(ShaderProgram *program) {
     glGenBuffers(1, &m_KdBO);
     glGenBuffers(1, &m_KsBO);
     glGenBuffers(1, &m_NsBO);
+    glGenBuffers(1, &m_UVBO);
 
     glBindVertexArray(m_VAO);
 
@@ -136,8 +138,32 @@ void MeshObject::init(ShaderProgram *program) {
         glEnableVertexAttribArray(6);
         glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
     } else {
-        // Do texture stuff here for kd
-        // TODO
+        // Bind the uv array
+        glBindBuffer(GL_ARRAY_BUFFER, m_UVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * uvCoords.size(), &uvCoords[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(9);
+        glVertexAttribPointer(9, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        // Load in the texture
+        std::vector<unsigned char> data;
+        unsigned error;
+        cout << "Loading " << m_textureFile << endl;
+
+        error = lodepng::decode(data, m_textureWidth, m_textureHeight, m_textureFile);
+        if (error) {
+            string s = string("Error: ") + lodepng_error_text(error);
+            cout << s << endl;
+            throw s;
+        }
+
+        // Now we upload to a texture
+        glGenTextures(1, &m_texture);
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_textureWidth, m_textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        m_uniform_texture = program->getUniformLocation("Kd");
     }
 
     // We upload Ks and Ns for both types anyways
@@ -175,6 +201,11 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadow
     glBindTexture(GL_TEXTURE_2D, shadowTexture);
     glBindTexture(GL_TEXTURE2, shadowTexture);
     glUniform1i(m_uniform_shadowTexture, 2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
+    glBindTexture(GL_TEXTURE3, m_texture);
+    glUniform1i(m_uniform_texture, 3);
 
     // Upload Light info
     vec4 lightDirection = V * vec4(light.lightDirection, 0.0f);

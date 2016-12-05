@@ -45,7 +45,7 @@ MeshConsolidator::MeshConsolidator(
 	unsigned long indexOffset(0);
 	// Unused values
 	vector<vec2> uv;
-	GLint texdata;
+	string texdata;
 	vector<vec3> kd;
 	vector<vec3> ks;
 	vector<float> ns;

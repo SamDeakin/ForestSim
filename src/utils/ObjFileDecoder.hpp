@@ -36,7 +36,7 @@ public:
             std::vector<glm::vec3> & positions,
             std::vector<glm::vec3> & normals,
             std::vector<glm::vec2> & uvCoords,
-            GLint & texdata,
+            std::string & texfile,
             std::vector<glm::vec3> & kd,
             std::vector<glm::vec3> & ks,
             std::vector<float> & shininess
@@ -72,7 +72,7 @@ public:
     static bool loadMTL(
             const char * objFilePath,
             const char * mtlReference,
-            GLint & texdata,
+            std::string & texfile,
             std::map<std::string,std::tuple<glm::vec3,glm::vec3,float>> & mtlData
     );
 
@@ -90,16 +90,6 @@ private:
     static void pathMinusFilename(
             const char * filepath,
             std::string * path
-    );
-
-    /**
-     * Loads the texture into OpenGL and returns the GLint reference to it
-     * Only supports png right now
-     *
-     * [in] filepath - the full path to the texture file
-     */
-    static GLint loadTexture(
-            std::string & filepath
     );
 };
 

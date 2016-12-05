@@ -44,6 +44,7 @@ private:
 
     // Extra shaders
     ShaderProgram m_phuong_untextured;
+    ShaderProgram m_phong_textured;
     FXAARenderer m_FXAA_renderer;
     ShaderProgram m_depth_only;
 

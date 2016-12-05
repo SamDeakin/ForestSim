@@ -6,6 +6,7 @@ using namespace glm;
 #include <iostream>
 #include <cstring>
 #include <glm/gtx/string_cast.hpp>
+#include <lodepng/lodepng.h>
 using namespace std;
 
 #include "Exception.hpp"
@@ -21,7 +22,7 @@ bool ObjFileDecoder::decode(
         std::vector<glm::vec3> & positions,
         std::vector<glm::vec3> & normals,
         std::vector<glm::vec2> & uvCoords,
-        GLint & texdata,
+        string & texfile,
         std::vector<glm::vec3> & kd,
         std::vector<glm::vec3> & ks,
         std::vector<float> & shininess
@@ -107,7 +108,7 @@ bool ObjFileDecoder::decode(
             string mtlfile;
             s >> mtlfile;
 
-            textured = loadMTL(objFilePath, mtlfile.c_str(), texdata, materials);
+            textured = loadMTL(objFilePath, mtlfile.c_str(), texfile, materials);
         } else if (currentLine.substr(0, 7) == "usemtl ") {
             // Set the current material
             istringstream s(currentLine.substr(7));
@@ -250,7 +251,7 @@ bool ObjFileDecoder::decode(
 bool ObjFileDecoder::loadMTL(
         const char * objFilePath,
         const char * mtlReference,
-        GLint & texdata,
+        string & texfile,
         std::map<std::string,std::tuple<glm::vec3,glm::vec3,float>> & mtlData
 ) {
     string path;
@@ -312,7 +313,25 @@ bool ObjFileDecoder::loadMTL(
 
             cout << "    Ns: " << currentShine << endl;
         } else if (currentLine.substr(0, 7) == "map_Kd ") {
-            // TODO ignore for now
+            // if we haven't loaded a texture yet
+            if (!textureSet) {
+                istringstream s(currentLine.substr(7));
+                string textureName;
+                s >> textureName;
+
+                string fullTexPath = path + textureName;
+                cout << "Loading texture " << fullTexPath << endl;
+                // Now load it in
+                texfile = fullTexPath;
+                textureSet = true;
+
+                cout << "Loaded texture: " << fullTexPath << endl;
+            } else {
+                // Unsupported file, so just return no materials
+                cout << "More than one texture, stopping" << endl;
+                mtlData.clear();
+                return false;
+            }
         } else if (currentLine.substr(0, 7) == "newmtl ") {
             // Add this material to the map
             mtlData[currentmtl] = make_tuple(currentKd, currentKs, currentShine);
@@ -346,8 +365,31 @@ void ObjFileDecoder::pathMinusFilename(
 }
 
 //---------------------------------------------------------------------------------------
-GLint ObjFileDecoder::loadTexture(
-        std::string & filepath
-) {
-    return 0; // TODO
-}
+//GLuint ObjFileDecoder::loadTexture(
+//        std::string & filepath
+//) {
+//    std::vector<unsigned char> data;
+//    unsigned width;
+//    unsigned height;
+//    unsigned error;
+//    cout << "stuff" << endl;
+//    error = lodepng::decode(data, width, height, filepath);
+//    cout << "stuff2" << endl;
+//    if (error) {
+//        string s = string("back: ") + lodepng_error_text(error);
+//        cout << s << endl;
+//        throw s;
+//    }
+//    cout << "stuff3" << endl;
+//    // Now we upload to a texture
+//    GLuint texture;
+//    glGenTextures(1, &texture);
+//    cout << "stuff4" << endl;
+//    glBindTexture(GL_TEXTURE_2D, texture);
+//    cout << "stuff5" << endl;
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+//    cout << "stuff6" << endl;
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    return texture;
+//}

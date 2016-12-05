@@ -7,7 +7,6 @@
 
 #include "RenderObject.hpp"
 #include "Light.hpp"
-#include "Material.hpp"
 #include <string>
 #include <vector>
 
@@ -52,6 +51,7 @@ private:
     GLint m_uniform_ambientIntensity;
     GLint m_uniform_shadowMatrix;
     GLint m_uniform_shadowTexture;
+    GLint m_uniform_texture;
 
     GLuint m_VAO;
     GLuint m_VBO;
@@ -60,10 +60,12 @@ private:
     GLuint m_KdBO;
     GLuint m_KsBO;
     GLuint m_NsBO;
+    GLuint m_UVBO;
 
-    GLint m_texture;
-
-    Material mat;
+    GLuint m_texture;
+    std::string m_textureFile;
+    unsigned m_textureWidth;
+    unsigned m_textureHeight;
 };
 
 
