@@ -22,10 +22,6 @@ MeshObject::MeshObject(string filepath, int density) {
 
     this->density = density;
 
-    // Check if this mesh is textured or untextured
-    // TODO
-    type = ShaderType::PHUONG_UNTEXTURED;
-
     // Log
     cout << "Loaded mesh: " << filepath << endl;
     cout << "    Vertices: " << positions.size() << endl;
@@ -40,7 +36,13 @@ MeshObject::MeshObject(string filepath, int density) {
 MeshObject::~MeshObject() {}
 
 void MeshObject::loadMesh() {
-    ObjFileDecoder::decode(filepath.c_str(), objectName, positions, normals, uvCoords);
+    bool textured = ObjFileDecoder::decode(filepath.c_str(), objectName, positions, normals, uvCoords, m_texture, Kd, Ks, Ns);
+
+    if (textured) {
+        type = ShaderType::PHUONG_TEXTURED;
+    } else {
+        type = ShaderType::PHUONG_UNTEXTURED;
+    }
 }
 
 void MeshObject::init(ShaderProgram *program) {
@@ -86,9 +88,6 @@ void MeshObject::init(ShaderProgram *program) {
     m_uniform_lightDirection = program->getUniformLocation("lightDirection");
     m_uniform_lightColour = program->getUniformLocation("lightColour");
     m_uniform_ambientIntensity = program->getUniformLocation("ambientIntensity");
-    m_uniform_material_kd = program->getUniformLocation("material.kd");
-    m_uniform_material_ks = program->getUniformLocation("material.ks");
-    m_uniform_material_shine = program->getUniformLocation("material.shininess");
     m_uniform_shadowMatrix = program->getUniformLocation("bias_P_V_shadow");
     m_uniform_shadowTexture = program->getUniformLocation("shadow");
 
@@ -96,8 +95,10 @@ void MeshObject::init(ShaderProgram *program) {
     // We could make this one call, but it's not
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_NBO);
-    glGenBuffers(1, &m_CBO);
     glGenBuffers(1, &m_MBO);
+    glGenBuffers(1, &m_KdBO);
+    glGenBuffers(1, &m_KsBO);
+    glGenBuffers(1, &m_NsBO);
 
     glBindVertexArray(m_VAO);
 
@@ -106,30 +107,6 @@ void MeshObject::init(ShaderProgram *program) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * positions.size(), &positions[0], GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-
-    // Normal Buffer
-    glBindBuffer(GL_ARRAY_BUFFER, m_NBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * normals.size(), &normals[0], GL_STATIC_DRAW);
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-
-    if (type == ShaderType::PHUONG_UNTEXTURED) {
-        // This is inefficient, but it has to be done
-        vec3 colour = vec3(1.0f, 1.0f, 1.0f);
-//        vec3 *col_arr = new vec3[positions.size()];
-//        for (int i = 0; i < positions.size(); i++) {
-//            col_arr[i] = colour;
-//        }
-        // Colour Buffer
-//        glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
-//        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * positions.size(), col_arr, GL_STATIC_DRAW);
-//        glEnableVertexAttribArray(0);
-//        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-//        delete[] col_arr;
-        mat.kd = colour;
-        mat.ks = colour;
-        mat.shininess = 100;
-    }
 
     // Model Transform
     glBindBuffer(GL_ARRAY_BUFFER, m_MBO);
@@ -147,6 +124,34 @@ void MeshObject::init(ShaderProgram *program) {
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
 
+    // Normal Buffer
+    glBindBuffer(GL_ARRAY_BUFFER, m_NBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * normals.size(), &normals[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+
+    if (type == ShaderType::PHUONG_UNTEXTURED) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_KdBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * Kd.size(), &Kd[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    } else {
+        // Do texture stuff here for kd
+        // TODO
+    }
+
+    // We upload Ks and Ns for both types anyways
+    glBindBuffer(GL_ARRAY_BUFFER, m_KsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * Ks.size(), &Ks[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_NsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * Ns.size(), &Ns[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), NULL);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     CHECK_GL_ERRORS;
@@ -176,11 +181,6 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadow
     glUniform3fv(m_uniform_lightDirection, 1, value_ptr(vec3(lightDirection)));
     glUniform3fv(m_uniform_lightColour, 1, value_ptr(light.lightColour));
     glUniform1f(m_uniform_ambientIntensity, light.ambientIntensity);
-
-    // Upload Material info
-    glUniform3fv(m_uniform_material_kd, 1, value_ptr(mat.kd));
-    glUniform3fv(m_uniform_material_ks, 1, value_ptr(mat.ks));
-    glUniform1f(m_uniform_material_shine, mat.shininess);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, positions.size(), instances.size());
 

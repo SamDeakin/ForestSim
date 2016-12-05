@@ -31,6 +31,9 @@ protected:
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> uvCoords;
+    std::vector<glm::vec3> Kd;
+    std::vector<glm::vec3> Ks;
+    std::vector<float> Ns;
     std::vector<glm::mat4> instances; // Model transforms for separate instances
 
     int density;
@@ -47,17 +50,18 @@ private:
     GLint m_uniform_lightDirection;
     GLint m_uniform_lightColour;
     GLint m_uniform_ambientIntensity;
-    GLint m_uniform_material_kd;
-    GLint m_uniform_material_ks;
-    GLint m_uniform_material_shine;
     GLint m_uniform_shadowMatrix;
     GLint m_uniform_shadowTexture;
 
     GLuint m_VAO;
     GLuint m_VBO;
     GLuint m_NBO;
-    GLuint m_CBO;
     GLuint m_MBO;
+    GLuint m_KdBO;
+    GLuint m_KsBO;
+    GLuint m_NsBO;
+
+    GLint m_texture;
 
     Material mat;
 };

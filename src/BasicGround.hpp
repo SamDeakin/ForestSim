@@ -8,7 +8,6 @@
 #include "RenderObject.hpp"
 #include "ShaderProgram.hpp"
 #include "Light.hpp"
-#include "Material.hpp"
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -32,19 +31,16 @@ private:
     GLint m_uniform_lightDirection;
     GLint m_uniform_lightColour;
     GLint m_uniform_ambientIntensity;
-    GLint m_uniform_material_kd;
-    GLint m_uniform_material_ks;
-    GLint m_uniform_material_shine;
     GLint m_uniform_shadowMatrix;
     GLint m_uniform_shadowTexture;
 
     GLuint m_VAO;
     GLuint m_VBO;
     GLuint m_NBO;
-    GLuint m_CBO;
     GLuint m_MBO;
-
-    Material mat;
+    GLuint m_KdBO;
+    GLuint m_KsBO;
+    GLuint m_NsBO;
 };
 
 

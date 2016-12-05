@@ -43,9 +43,15 @@ MeshConsolidator::MeshConsolidator(
 	vector<vec3> normals;
 	BatchInfo batchInfo;
 	unsigned long indexOffset(0);
+	// Unused values
+	vector<vec2> uv;
+	GLint texdata;
+	vector<vec3> kd;
+	vector<vec3> ks;
+	vector<float> ns;
 
     for(const ObjFilePath & objFile : objFileList) {
-	    ObjFileDecoder::decode(objFile.c_str(), meshId, positions, normals);
+	    ObjFileDecoder::decode(objFile.c_str(), meshId, positions, normals, uv, texdata, kd, ks, ns);
 
 	    uint numIndices = positions.size();
 

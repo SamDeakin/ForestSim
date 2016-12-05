@@ -39,6 +39,10 @@ GLfloat raw_colour[] = {
         0.2275f, 0.3725f, 0.0431f
 };
 
+GLfloat raw_shininess[] = {
+        20, 20, 20, 20, 20, 20
+};
+
 BasicGround::BasicGround() {
     program = NULL;
 }
@@ -55,9 +59,6 @@ void BasicGround::init(ShaderProgram *program) {
     m_uniform_lightDirection = program->getUniformLocation("lightDirection");
     m_uniform_lightColour = program->getUniformLocation("lightColour");
     m_uniform_ambientIntensity = program->getUniformLocation("ambientIntensity");
-    m_uniform_material_kd = program->getUniformLocation("material.kd");
-    m_uniform_material_ks = program->getUniformLocation("material.ks");
-    m_uniform_material_shine = program->getUniformLocation("material.shininess");
     m_uniform_shadowMatrix = program->getUniformLocation("bias_P_V_shadow");
     m_uniform_shadowTexture = program->getUniformLocation("shadow");
 
@@ -65,32 +66,19 @@ void BasicGround::init(ShaderProgram *program) {
     // We could make this one call, but it's not
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_NBO);
-    glGenBuffers(1, &m_CBO);
     glGenBuffers(1, &m_MBO);
+    glGenBuffers(1, &m_KdBO);
+    glGenBuffers(1, &m_KsBO);
+    glGenBuffers(1, &m_NsBO);
 
     glBindVertexArray(m_VAO);
 
     // Vertex Buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, &raw_vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, raw_vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-
-    // Normal Buffer
-    glBindBuffer(GL_ARRAY_BUFFER, m_NBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(raw_normals), &raw_normals, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-
-    // Colour Buffer
-//    glBindBuffer(GL_ARRAY_BUFFER, m_CBO);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(raw_colour), &raw_colour, GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-    // Now handled with a material
-    mat.kd = vec3(raw_colour[0], raw_colour[1], raw_colour[2]);
-    mat.ks = mat.kd;
-    mat.shininess = 20;
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribDivisor(0, 0);
 
     // Model Transform
     // We basically want this plane to be inescapable
@@ -110,6 +98,33 @@ void BasicGround::init(ShaderProgram *program) {
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
 
+    // Normal Buffer
+    glBindBuffer(GL_ARRAY_BUFFER, m_NBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, raw_normals, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribDivisor(5, 0);
+
+    // Colour Buffers
+    glBindBuffer(GL_ARRAY_BUFFER, m_KdBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, raw_colour, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribDivisor(6, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_KsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, raw_colour, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribDivisor(7, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_NsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6, raw_shininess, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribDivisor(8, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     CHECK_GL_ERRORS;
@@ -139,11 +154,6 @@ void BasicGround::render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shado
     glUniform3fv(m_uniform_lightDirection, 1, value_ptr(vec3(lightDirection)));
     glUniform3fv(m_uniform_lightColour, 1, value_ptr(light.lightColour));
     glUniform1f(m_uniform_ambientIntensity, light.ambientIntensity);
-
-    // Upload Material data
-    glUniform3fv(m_uniform_material_kd, 1, value_ptr(mat.kd));
-    glUniform3fv(m_uniform_material_ks, 1, value_ptr(mat.ks));
-    glUniform1f(m_uniform_material_shine, mat.shininess);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 1);
 
