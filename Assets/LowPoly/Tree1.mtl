@@ -1,6 +1,7 @@
 # Blender MTL File: 'None'
 # Material Count: 2
 
+# Leaves
 newmtl Nuovo_6
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -11,6 +12,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
+# Trunk
 newmtl Nuovo_7
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000

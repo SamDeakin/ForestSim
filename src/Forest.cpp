@@ -78,7 +78,7 @@ void Forest::init() {
     m_ground.init(&m_phuong_untextured);
 
     light.ambientIntensity = 0.1f;
-    light.lightColour = vec3(1.0f, 1.0f, 1.0f);
+    light.lightColour = vec3(0.9f, 0.9f, 0.9f);
     light.lightDirection = normalize(vec3(0.0f, -1.0f, -1.0f));
     m_P_light = glm::ortho(-2000.0f, 2000.0f, -1500.0f, 2750.0f, -500.0f, 2500.0f);
     m_V_light = glm::lookAt(-light.lightDirection * 1000.0f, vec3(0.0f), vec3(0.0f, 1.0f, 0.0f));
@@ -186,9 +186,9 @@ void Forest::init() {
 void Forest::appLogic() {
     double dx = 0;
     double dy = 0;
-    double speed = 1.0;
+    double speed = 3.0;
     if (m_shift_held) {
-        speed = 10.0;
+        speed *= 10.0;
     }
 
     if (m_w_held) {
@@ -224,6 +224,17 @@ void Forest::guiLogic() {
     if( ImGui::Button( "Quit Application" ) ) {
         glfwSetWindowShouldClose(m_window, GL_TRUE);
     }
+
+    ImGui::Text("Sun Color");
+
+    // Retrieve color component from slider and store in m_shape_color.
+    ImGui::SliderFloat("Red Channel##Light", &(light.lightColour.r), 0.0f, 1.0f);
+    ImGui::SliderFloat("Green Channel##Light", &(light.lightColour.g), 0.0f, 1.0f);
+    ImGui::SliderFloat("Blue Channel##Light", &(light.lightColour.b), 0.0f, 1.0f);
+
+    ImGui::SliderFloat("Ambient Intensity##Light", &(light.ambientIntensity), 0.0f, 1.0f);
+
+    ImGui::Separator();
 
     ImGui::InputInt("FXAA debug setting", &m_FXAA_renderMode, 1, 1);
     if (m_FXAA_renderMode > 4) {
