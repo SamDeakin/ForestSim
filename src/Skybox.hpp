@@ -24,7 +24,7 @@ public:
     void init();
 
     // Render the skybox
-    void render(glm::mat4 P, glm::mat4 V);
+    void render(glm::mat4 P, glm::mat4 V, Light &light);
 
 private:
     // File name
@@ -35,6 +35,7 @@ private:
     GLint m_uniform_P;
     GLint m_uniform_V;
     GLint m_uniform_texture;
+    GLint m_uniform_sun_colour;
 
     // Skybox textures
     unsigned width;

@@ -125,6 +125,7 @@ void Skybox::init() {
     m_uniform_P = m_shader.getUniformLocation("P");
     m_uniform_V = m_shader.getUniformLocation("V");
     m_uniform_texture = m_shader.getUniformLocation("skybox");
+    m_uniform_sun_colour = m_shader.getUniformLocation("sunColour");
 
     // Upload textures and stuff
     glGenTextures(1, &m_texture);
@@ -156,10 +157,13 @@ void Skybox::init() {
 Skybox::~Skybox() {}
 
 // Render the skybox
-void Skybox::render(mat4 P, mat4 V) {
+void Skybox::render(mat4 P, mat4 V, Light &light) {
     mat4 V_wout_trans = mat4(mat3(V));
 
     m_shader.enable();
+
+    // We upload the sun colour to tint the skybox
+    glUniform3fv(m_uniform_sun_colour, 1, value_ptr(light.lightColour));
 
     glEnable(GL_TEXTURE_CUBE_MAP);
     glDepthMask(GL_FALSE);
