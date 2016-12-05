@@ -38,6 +38,8 @@
 	
 	This objective is pretty much just OpenGL code. It loads one sunny skybox image and samples from it using 3D coordinates and the OpenGL $GL\_TEXTURE\_CUBE\_MAP$ functionality. We take a direction from the current camera location independent of translation so the skybox appears to never move. The code for setting up the cube map is in the $src/Skybox$ object, and the shader that renders it is $Assets/Skybox$.
 	
+	One thing I added late that I think really helped the scene is tinting the skybox by the colour of the sun. When the sun colour is changed away from white it really makes the scene continuous, as opposed to having a dark scene with a bright sunny skybox.
+	
 	\begin{center}
 		\bf Variations / objective 3
 	\end{center}
