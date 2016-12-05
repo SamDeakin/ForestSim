@@ -10,7 +10,7 @@
 
 class FXAARenderer : public TextureRenderer {
 public:
-    void render(GLint texture, GLint renderMode);
+    void render(GLuint texture, GLint renderMode);
     void init() override;
 
 private:

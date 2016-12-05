@@ -12,6 +12,7 @@
 #include "Light.hpp"
 #include "TextureRenderer.hpp"
 #include "FXAARenderer.hpp"
+#include "SSAORenderer.hpp"
 
 class Forest : public Window {
 public:
@@ -46,6 +47,7 @@ private:
     ShaderProgram m_phuong_untextured;
     ShaderProgram m_phong_textured;
     FXAARenderer m_FXAA_renderer;
+    SSAORenderer m_SSAO_renderer;
     ShaderProgram m_depth_only;
 
     // For rendering to FBO and then to screen in quad after
@@ -110,4 +112,7 @@ private:
     glm::mat4 m_to_tex;
     glm::mat4 m_P_light;
     glm::mat4 m_V_light;
+
+    bool m_SSAO_enabled;
+    GLint m_SSAO_renderMode;
 };

@@ -39,7 +39,9 @@ Forest::Forest() :
     m_FXAA_renderMode(3),
     m_skybox_enabled(true),
     m_shadow_enabled(true),
-    m_show_shadow(false) {
+    m_show_shadow(false),
+    m_SSAO_enabled(true),
+    m_SSAO_renderMode(2) {
     // Empty
 }
 
@@ -130,11 +132,20 @@ void Forest::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glGenRenderbuffers(1, &m_depthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1920, 1080);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer);
+//    glGenRenderbuffers(1, &m_depthBuffer);
+//    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
+//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1920, 1080);
+//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer);
+    glGenTextures(1, &m_depthBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_depthBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, 1920, 1080, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
 
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthBuffer, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_sceneTexture, 0);
 
     GLenum toBeDrawn = GL_COLOR_ATTACHMENT0;
@@ -190,6 +201,7 @@ void Forest::init() {
 
     m_quadRenderer.init();
     m_FXAA_renderer.init();
+    m_SSAO_renderer.init();
 }
 
 void Forest::appLogic() {
@@ -250,6 +262,13 @@ void Forest::guiLogic() {
         m_FXAA_renderMode = 4;
     } else if (m_FXAA_renderMode < 0) {
         m_FXAA_renderMode = 0;
+    }
+
+    ImGui::InputInt("SSAO debug setting", &m_SSAO_renderMode, 1, 1);
+    if (m_SSAO_renderMode > 3) {
+        m_SSAO_renderMode = 3;
+    } else if (m_SSAO_renderMode < 0) {
+        m_SSAO_renderMode = 0;
     }
 
     ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
@@ -320,10 +339,16 @@ void Forest::draw() {
             glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
         }
 
-        if (m_FXAA_enabled) {
-            m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);
+        if (m_SSAO_enabled) {
+            // Do SSAO
+            m_SSAO_renderer.render(m_sceneTexture, m_depthBuffer, m_SSAO_renderMode);
+
         } else {
-            m_quadRenderer.render(m_sceneTexture);
+            if (m_FXAA_enabled) {
+                m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);
+            } else {
+                m_quadRenderer.render(m_sceneTexture);
+            }
         }
     }
 }
@@ -492,6 +517,18 @@ bool Forest::keyInputEvent(int key, int action, int mods) {
                 break;
             case GLFW_KEY_N:
                 m_show_shadow = !m_show_shadow;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_O:
+                m_SSAO_enabled = !m_SSAO_enabled;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_LEFT_BRACKET:
+                m_SSAO_renderMode--;
+                eventHandled = true;
+                break;
+            case GLFW_KEY_RIGHT_BRACKET:
+                m_SSAO_renderMode++;
                 eventHandled = true;
                 break;
             case GLFW_KEY_LEFT_SHIFT:

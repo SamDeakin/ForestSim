@@ -19,7 +19,7 @@ void Camera::init(int framebufferWidth, int framebufferHeight) {
     m_P = perspective(
             radians(60.0f),
             float(framebufferWidth) / float(framebufferHeight),
-            0.1f, 100000.0f);
+            0.5f, 10000.0f);
 
     m_V_rot = quat();
     m_V_scale = mat4();

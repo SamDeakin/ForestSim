@@ -4,7 +4,7 @@
 
 #include "FXAARenderer.hpp"
 
-void FXAARenderer::render(GLint texture, GLint renderMode) {
+void FXAARenderer::render(GLuint texture, GLint renderMode) {
     m_quad_program.enable();
     glBindVertexArray(m_quad_VAO);
     glActiveTexture(GL_TEXTURE0);
