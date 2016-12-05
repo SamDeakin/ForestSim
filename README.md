@@ -52,7 +52,8 @@ Implementation details can be found in documentation/Implementation.pdf
     BroadLeafStraightTrunk - http://tf3dm.com/3d-model/broad-leaf-straight-trunk-39747.html
     Pine_4m - https://www.cgtrader.com/free-3d-models/plant-tree/conifer/free-pine-trees-sample-model
     DownyOak - https://www.cgtrader.com/free-3d-models/plant-tree/leaf-tree/xfrogplants-downy-oak
-    LowPoly and LowPolyToon - https://www.turbosquid.com
+    LowPoly - http://www.turbosquid.com/FullPreview/Index.cfm/ID/986631
+    LowPolyToon - http://www.turbosquid.com/FullPreview/Index.cfm/ID/999137
 
 # Objectives
 1. The program should take input from the script and produce multiples of every object specified in the script to generate a ”forest” of objects.
