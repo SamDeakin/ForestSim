@@ -12,13 +12,13 @@
 	
 	I think in terms of encapsulation, the renderable objects are encapsulated in their own classes fairly well. I wish I had encapsulated things like extra texture objects and drawing buffers too though. They have all ended up crowding the $Forest$ object, making it a little too large.
 	
-	I have encountered issues with changing the resolutions. Specifically related to the calls to $glViewPort$ in the $Forest::render$ method. I have to change once to the shadow map resolution, and then back to the screen resolution. I have built the program to work with a 1080p resolution, and initially launch at that, but other resolutions may not work as well. Replacing the $glViewPort(0, 0, 1920, 1080);$ call with one that uses the current resolution doesn't quite work as a fix either. On my test machine with a 1080p monitor I found that the numbers reported in the $(m_framebufferWidth, m_framebufferHeight)$ values to actually be $(1920, 1032)$, probably because of it not being fullscreen. They would then change to a 4k resolution when I dragged the monitor to my laptop's high dpi screen, but actually be the full resolution. I couldn't seem to get it to work well on every monitor size.
+	I have encountered issues with changing the resolutions. Specifically related to the calls to $glViewPort$ in the $Forest::render$ method. I have to change once to the shadow map resolution, and then back to the screen resolution. I have built the program to work with a 1080p resolution, and initially launch at that, but other resolutions may not work as well. Replacing the $glViewPort(0, 0, 1920, 1080);$ call with one that uses the current resolution doesn't quite work as a fix either. On my test machine with a 1080p monitor I found that the numbers reported in the $(m\_framebufferWidth, m\_framebufferHeight)$ values to actually be $(1920, 1032)$, probably because of it not being fullscreen. They would then change to a 4k resolution when I dragged the monitor to my laptop's high dpi screen, but actually be the full resolution. I couldn't seem to get it to work well on every monitor size.
 	
 	\begin{center}
 		\bf Loading objects / objective 1
 	\end{center}
 	
-	I started loading from the lua file using A4's $scene_lua.cpp$ as a template. I used the functions that set up loading from the file, and then used the actual script-bound functions as examples for when I created my own bound functions like $gr.make_list()$.
+	I started loading from the lua file using A4's $scene\_lua.cpp$ as a template. I used the functions that set up loading from the file, and then used the actual script-bound functions as examples for when I created my own bound functions like $gr.make\_list()$.
 	
 	I found this took a lot of time, but worked fairly immediately when it was done. The only issue I encountered was with taking tables as an argument. I couldn't figure out how to index into a table to retrieve values, so I changed the functions to take three arguments in place of a table. It looks less clean and readable in the script, but saved development time and doesn't change functionality. This is all in a file of the same name under the src/ directory.
 	
@@ -36,7 +36,7 @@
 		\bf Skybox / objective 2
 	\end{center}	
 	
-	This objective is pretty much just OpenGL code. It loads one sunny skybox image and samples from it using 3D coordinates and the OpenGL $GL_TEXTURE_CUBE_MAP$ functionality. We take a direction from the current camera location independent of translation so the skybox appears to never move. The code for setting up the cube map is in the $src/Skybox$ object, and the shader that renders it is $Assets/Skybox$.
+	This objective is pretty much just OpenGL code. It loads one sunny skybox image and samples from it using 3D coordinates and the OpenGL $GL\_TEXTURE\_CUBE\_MAP$ functionality. We take a direction from the current camera location independent of translation so the skybox appears to never move. The code for setting up the cube map is in the $src/Skybox$ object, and the shader that renders it is $Assets/Skybox$.
 	
 	\begin{center}
 		\bf Variations / objective 3
@@ -66,6 +66,10 @@
 		\bf Texture Mapping / objective 5
 	\end{center}
 	
+	I had to make huge changes to the $ObjFileDecoder$ to accomplish this objective. I basically made it handle deciding everything related to material too. It opens referenced mtl files and also returns info on which parts of a model should be shaded with what material.
+	
+	I implemented this after Phong Shading (objective 6), and it also required that materials be calculated per-vertex. This is because many of the obj files had multiple materials for each object. It also required that I actually do something with the uv coordinates, previously I was just ignoring them.
+	
 	\begin{center}
 		\bf Phong Shading / objective 6
 	\end{center}
@@ -79,8 +83,6 @@
 	\begin{center}
 		\bf Shadow Mapping / objective 7
 	\end{center}
-	
-	
 	
 	I had a lot of trouble for this objective actually binding the depth texture correctly for both drawing and reading. It took far longer than I thought it would to get that part working. After I had that part it was maybe 30 minutes of tuning to get it to it's present quality.
 	
@@ -100,7 +102,7 @@
 		\bf Crepuscular (God) Rays / objective 9
 	\end{center}
 	
-	I didn't have time for this one :(
+	I didn't have time for this one :( I wish I had. It would have really helped the feel of being in the forest. 
 	
 	\begin{center}
 		\bf FXAA / objective 10
@@ -108,7 +110,7 @@
 	
 	The implementation for this one is pretty much entirely inside the $Assets/FXAARendererFS.glsl$ shader.
 	
-	I think this algorithm was really cool to implement, and I'm pretty proud of it. The first step is deciding which pixels may have aliasing issues. We do an edge detection algorithm where we take the relative luminosities of the surrounding pixels, and then early exit if the maximum range difference is under a certain threshold ($EDGE_THRESHOLD$). If you choose FXAA RenderMode 1, you can see all of these pixels in bright red.
+	I think this algorithm was really cool to implement, and I'm pretty proud of it. The first step is deciding which pixels may have aliasing issues. We do an edge detection algorithm where we take the relative luminosities of the surrounding pixels, and then early exit if the maximum range difference is under a certain threshold ($EDGE\_THRESHOLD$). If you choose FXAA RenderMode 1, you can see all of these pixels in bright red.
 	
 	The next step is figuring out whether the detected edge is closer to vertical or horizontal. To do this, we take samples of relative luminosity from the 4 more cornering pixels, then calculate weighted averages and compare them. To see this visualized choose FXAA RenderMode 2. The Vertical lines will be Purple and the Horizontal lines Yellow. In areas with angles close to 45 degrees you can see there is a combination of much of both colours.
 	
