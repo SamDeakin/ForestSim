@@ -52,5 +52,10 @@ void main() {
     vec3 phongColour = phongModel(vertexPosition, vertexNormal) * lightColour;
     float shade = texture(shadow, vec3(shadowPosition.xy, shadowPosition.z - SHADOW_SAMPLE_BIAS / shadowPosition.w));
 
-    fragColour = vec4(phongColour * shade + ambientIntensity * lightColour, 1.0f);
+    // We do this to make shadows not shitty, this isn't a usual part of phong shading
+    // We make shadows lighter where the normal is closer to our view direction
+    float ambientCoefficient = dot(normalize(vertexNormal), normalize(-vertexPosition));
+    vec3 ambientValue = ambientIntensity * ambientCoefficient * material.kd;
+
+    fragColour = vec4(phongColour * shade + ambientValue, 1.0f);
 }

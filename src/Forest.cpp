@@ -77,7 +77,7 @@ void Forest::init() {
     m_camera.init(m_framebufferWidth, m_framebufferHeight);
     m_ground.init(&m_phuong_untextured);
 
-    light.ambientIntensity = 0.2f;
+    light.ambientIntensity = 0.1f;
     light.lightColour = vec3(1.0f, 1.0f, 1.0f);
     light.lightDirection = normalize(vec3(0.0f, -1.0f, -1.0f));
     m_P_light = glm::ortho(-2000.0f, 2000.0f, -1500.0f, 2750.0f, -500.0f, 2500.0f);
@@ -268,14 +268,6 @@ void Forest::draw() {
         // Note this call is pretty buggy
         glViewport(0, 0, 1920, 1080);
 
-        // Something like this isn't enough to fix it
-        // This is why 1080p is the only supported resolution
-//        if (m_framebufferWidth == 1920) {
-//            glViewport(0, 0, 1920, 1080);
-//        } else {
-//            glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
-//        }
-
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -283,8 +275,8 @@ void Forest::draw() {
             m_skybox.render(P, V);
         }
 
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glDisable(GL_CULL_FACE);
+//        glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
 
         GLuint shadow_texture = m_shadow_tex;
@@ -299,6 +291,14 @@ void Forest::draw() {
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Something like this isn't enough to fix the glViewport bug
+        // This is why 1080p is the only supported resolution
+        if (m_framebufferWidth == 1920) {
+            glViewport(0, 0, 1920, 1080);
+        } else {
+            glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
+        }
 
         if (m_FXAA_enabled) {
             m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);

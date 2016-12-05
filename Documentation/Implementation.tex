@@ -74,6 +74,8 @@
 	
 	The code for this can be seen inside $src/MeshObject.cpp$, $ObjFileDecode.cpp$, and the Phong shaders inside the Assets/ folder. It should be noted that I have a friend named Phuong, so I spent the first few days of working on the project accidentally spelling things that way instead.
 	
+	One problem I was experiencing was that all shadows appeared very dark and the same colour no matter what material there was. I fixed this problem by varying the ambient light to provide more light in fragments more directly facing the camera, and multiplying the colour by the kd so the fragment maintains some semblance of correct colour. I find this was a massively good change, especially compared to the time it took to implement. It can be seen commented in $Assets/PhuongUntexturedFS.glsl$.
+	
 	\begin{center}
 		\bf Shadow Mapping / objective 7
 	\end{center}

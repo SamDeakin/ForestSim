@@ -158,6 +158,7 @@ void MeshObject::render(glm::mat4 P, glm::mat4 V, Light &light, glm::mat4 shadow
 
     glBindVertexArray(m_VAO);
     glCullFace(GL_NONE);
+    glDisable(GL_CULL_FACE);
 
     glUniformMatrix4fv(m_uniform_P, 1, GL_FALSE, value_ptr(P));
     glUniformMatrix4fv(m_uniform_V, 1, GL_FALSE, value_ptr(V));
