@@ -80,7 +80,7 @@ void Forest::init() {
     light.ambientIntensity = 0.2f;
     light.lightColour = vec3(1.0f, 1.0f, 1.0f);
     light.lightDirection = normalize(vec3(0.0f, -1.0f, -1.0f));
-    m_P_light = glm::ortho(-1500.0f, 1500.0f, -1500.0f, 2750.0f, -500.0f, 2500.0f);
+    m_P_light = glm::ortho(-2000.0f, 2000.0f, -1500.0f, 2750.0f, -500.0f, 2500.0f);
     m_V_light = glm::lookAt(-light.lightDirection * 1000.0f, vec3(0.0f), vec3(0.0f, 1.0f, 0.0f));
     m_to_tex = glm::mat4(
             0.5f, 0.0f, 0.0f, 0.0f,

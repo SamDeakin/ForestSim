@@ -584,6 +584,7 @@ int gr_object_rotate_cmd(lua_State* L) {
     luaL_argcheck(L, axis >= 'x' && axis <= 'z', 2, "Axis must be x, y or z");
 
     double angle = luaL_checknumber(L, 3);
+    angle = angle * 3.14159265359 / 180;
 
     self->rotate(axis, angle);
 

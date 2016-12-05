@@ -107,10 +107,21 @@ void ObjFileDecoder::decode(
                        &positionIndexB, &uvCoordIndexB, &normalIndexB,
                        &positionIndexC, &uvCoordIndexC, &normalIndexC);
 
-                // .obj file uses indices that start at 1, so subtract 1 so they start at 0.
-                uvCoordIndexA--;
-                uvCoordIndexB--;
-                uvCoordIndexC--;
+
+
+                // Adjust if they're negative
+                if (uvCoordIndexA < 0) {
+                    int uv_size = temp_uvCoords.size();
+
+                    uvCoordIndexA = uv_size + uvCoordIndexA;
+                    uvCoordIndexB = uv_size + uvCoordIndexB;
+                    uvCoordIndexC = uv_size + uvCoordIndexC;
+                } else {
+                    // .obj file uses indices that start at 1, so subtract 1 so they start at 0.
+                    uvCoordIndexA--;
+                    uvCoordIndexB--;
+                    uvCoordIndexC--;
+                }
 
                 uvCoords.push_back(temp_uvCoords[uvCoordIndexA]);
                 uvCoords.push_back(temp_uvCoords[uvCoordIndexB]);
@@ -134,12 +145,28 @@ void ObjFileDecoder::decode(
                        &positionIndexC, &normalIndexC);
             }
 
-            positionIndexA--;
-            positionIndexB--;
-            positionIndexC--;
-            normalIndexA--;
-            normalIndexB--;
-            normalIndexC--;
+            // Here we adjust them if the indices are negative
+            // If one is negative we assume they all will be
+            if (positionIndexA < 0) {
+                int position_size = temp_positions.size();
+                int normal_size = temp_normals.size();
+
+//                cout << positionIndexA << " " << positionIndexB << " " << positionIndexC <<  " " << position_size << endl;
+
+                positionIndexA = position_size + positionIndexA;
+                positionIndexB = position_size + positionIndexB;
+                positionIndexC = position_size + positionIndexC;
+                normalIndexA = normal_size + normalIndexA;
+                normalIndexB = normal_size + normalIndexB;
+                normalIndexC = normal_size + normalIndexC;
+            } else {
+                positionIndexA--;
+                positionIndexB--;
+                positionIndexC--;
+                normalIndexA--;
+                normalIndexB--;
+                normalIndexC--;
+            }
 
             positions.push_back(temp_positions[positionIndexA]);
             positions.push_back(temp_positions[positionIndexB]);
@@ -148,6 +175,9 @@ void ObjFileDecoder::decode(
             normals.push_back(temp_normals[normalIndexA]);
             normals.push_back(temp_normals[normalIndexB]);
             normals.push_back(temp_normals[normalIndexC]);
+
+            size_t s = positions.size() - 1;
+//            cout << to_string(positions[s]) << " " << to_string(positions[s - 1]) << " " << to_string(positions[s - 2]) << " " << positionIndexA << " " << positionIndexB << " " << positionIndexC << endl;
         }
     }
 
