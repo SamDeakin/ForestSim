@@ -16,7 +16,6 @@
 #include <iostream>
 #include <map>
 #include <GlErrorCheck.hpp>
-#include <OpenGL/OpenGL.h>
 
 using namespace std;
 using namespace glm;

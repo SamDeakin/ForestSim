@@ -3,10 +3,11 @@ Use CMAKE. Good luck!
 
 jk, run these commands
 
-First run cmake to generate the build directory and makefile like this:
-```cmake cmake-build-debug```
+First make a build directory (```mkdir cmake-build-debug```) and then cd into it.
 
-Now cd into the ```cmake-build-debug``` directory and run make to execute the makefile.
+From this directory run ```cmake ..``` to execute cmake, and then ```make``` to build.
+
+If make complains about missing lua functions then you have to build lua manually. cd to the ```shared/lua-5.3.1/src``` directory and do ```make <platform>``` where platform is ```linux``` or whatever you're running on, then try making from the cmake-build-debug directory again.
 
 Running from here should be like ```./ForestSim Assets/<Script>```
 

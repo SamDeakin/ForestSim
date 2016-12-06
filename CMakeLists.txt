@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 project(ForestSim)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -41,7 +41,7 @@ MESSAGE( STATUS "OpenGL: " ${OPENGL_INCLUDE_DIR})
 # Only add include directory if not MacOS
 # Cmake does a lot of wierd stuff to make .frameworks work on MacOS, so this call fails there
 IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_include_directories(ForestSim ${OPENGL_INCLUDE_DIR})
+#    target_include_directories(ForestSim ${OPENGL_INCLUDE_DIR})
 else()
     # We are a MacOS system, so link with cocoa
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
@@ -104,6 +104,9 @@ target_link_libraries(ForestSim gl3w)
 target_link_libraries(ForestSim lodepng)
 target_link_libraries(ForestSim imgui_impl)
 
+IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(ForestSim "-ldl -lX11 -lXi -lXrandr -lXxf86vm -lXinerama -lXcursor -lrt -lm -pthread")
+ENDIF()
 ADD_CUSTOM_COMMAND(TARGET ForestSim PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E create_symlink
         ${CMAKE_SOURCE_DIR}/Assets $<TARGET_FILE_DIR:ForestSim>/Assets)
