@@ -91,8 +91,10 @@
 		\item M - Toggle shadows
 		\item N - Show the shadow texture. This draws the shadow depth pass to the screen
 		\item Q - Close the program
+		\item O - Toggle SSAO
 		\item R - Reset the camera position
 		\item +/- - Adjust the FXAA render mode. An explanation of modes is below
+		\item {[/] - Adjust åthe SSAO render mode. An explanation of modes is below and in Implementation.pdf.}
 	\end{itemize}
 	
 	\begin{center}
@@ -110,4 +112,20 @@
 	Mode 3 shows one step of the searching and blurring algorithm. I find this looks best so it is the default.
 	
 	Mode 4 lets the algorithm continue to search until it is satisfied. I find this decreases the sharpness of the image a lot.
+	
+	\begin{center}
+		\bf SSAO Render Modes
+	\end{center}
+	
+	Modes range from 0 to 4.
+	
+	Mode 0 is off.
+	
+	Mode 1 is draw the depth buffer.
+	
+	Mode 2 show the noise texture repeating across the screen.
+	
+	Mode 3 shows the occlusion portion of the image.
+	
+	Mode 4 is the full calculation.
 \end{document}

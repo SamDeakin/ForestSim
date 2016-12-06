@@ -102,7 +102,17 @@
 		\bf Ambient Occlusion / objective 8
 	\end{center}
 	
-	It's done but I didn't have time for documentation :(
+	Ambient occlusion is implemented, pretty much entirely inside the $src/SSAORenderer$ class and the $Assets/SSAORendererFS.glsl$ shader.
+	
+	This shader samples from the depth buffer to decide how occluded a target pixel is. You can see the depth buffer draw with SSAO render mode 1.
+	
+	I start by uploading a static kernel that I generate randomly at the beginning of the program. I also upload a repeating noise texture that I will sample from to generate modifications to the kernel. You can see this repeated noise texture draw in render mode 2. I begin with 32 samples.
+	
+	I take samples from pixels withing 16 pixels of the target, randomized based on the kernel and noise. If the sample is closer to the camera than the target pixel then I count it as occluding the target pixel. I add these up.
+	
+	At the end I will have a score out of 32 for how much the scene occludes the target pixel. I translate this to a score out of one. You can see this score drawn to the screen with render mode 3. Render mode 4 is the final value and is the full SSAO calculation.
+	
+	Two additions that I could have added but didn't have time for for this objective would be a final slight blur to remove the grainy effect, and to scale the kernel to be smaller for further back objects in the scene.
 	
 	\begin{center}
 		\bf Crepuscular (God) Rays / objective 9
@@ -123,4 +133,6 @@
 	We then take steps parallel to the line to try to sample how soon it ends. This taking steps parallel thing tripped me out at first, but it makes a lot of sense. We gather sample information along the edge and end up blurring along the edge to make the transition seem much more gradual.
 	
 	RenderMode's 3 and 4 control the number of samples. 3 takes one sample, which looks good, but not that gradual along very horizontal or very vertical edges. 4 takes up to 8 samples. It stops sampling when it reaches a pixel that has a much greater difference in luminosity from the current average. It takes a weighted average as it goes, weighting further pixels much less than close ones.
+	
+	The heuristics I programmed for RenderMode 4 aren't very good. They cause some very weird artifacts in blocky areas, and just looks downright terrible in my $Assets/LowPolyComplex.lua$ scene. I believe it is caused by the program sampling too far and reaching a block of different colour, causing extreme lightening to happen. This is why I left RenderMode 3 as the default.
 \end{document}
