@@ -45,9 +45,9 @@ void TextureRenderer::render(GLint texture) {
     // Now render to screen
     m_quad_program.enable();
     glBindVertexArray(m_quad_VAO);
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE8);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glUniform1i(m_uniform_sceneTexture, 0);
+    glUniform1i(m_uniform_sceneTexture, 8);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
     m_quad_program.disable();

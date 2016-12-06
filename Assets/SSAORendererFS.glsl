@@ -3,6 +3,7 @@
 
 in  vec2 uv;
 out vec4 fragColour;
+
 uniform sampler2D sceneTexture;
 uniform sampler2D depthTexture;
 uniform int renderMode;
@@ -44,9 +45,11 @@ void main() {
     if (renderMode == 1) {
         // Render just the depth to screen
         fragColour = vec4(vec3(linearize(texture(depthTexture, uv))), 1.0f);
+        return;
     } else if (renderMode == 2) {
         // Do SSAO
         fragColour = vec4(texture(noiseTexture, screenToNoiseSample(uv)));
+        return;
     } else if (renderMode == 3 || renderMode == 4) {
         float fragDepth = linearize(texture(depthTexture, uv));
         float occlusion = 0.0f;
@@ -81,12 +84,16 @@ void main() {
 
         if (renderMode == 3) {
             fragColour = vec4(vec3(occlusion), 1.0f);
+            return;
         } else {
             vec3 colour = texture(sceneTexture, uv).xyz;
             vec3 finalColour = OCCLUSION_MODIFIER * occlusion * colour + (1 - OCCLUSION_MODIFIER) * colour;
             fragColour = vec4(finalColour, 1.0f);
+            return;
         }
     } else {
         fragColour = texture(sceneTexture, uv);
+        return;
     }
+    return;
 }

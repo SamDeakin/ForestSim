@@ -7,9 +7,9 @@
 void FXAARenderer::render(GLuint texture, GLint renderMode) {
     m_quad_program.enable();
     glBindVertexArray(m_quad_VAO);
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glUniform1i(m_uniform_sceneTexture, 0);
+    glUniform1i(m_uniform_sceneTexture, 7);
     glUniform1i(m_uniform_renderMode, renderMode);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

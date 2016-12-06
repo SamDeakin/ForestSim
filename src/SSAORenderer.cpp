@@ -19,9 +19,9 @@ void SSAORenderer::render(GLuint sceneTexture, GLuint depthTexture, GLint render
 
     glBindVertexArray(m_quad_VAO);
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, sceneTexture);
-    glUniform1i(m_uniform_sceneTexture, 0);
+    glUniform1i(m_uniform_sceneTexture, 6);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthTexture);

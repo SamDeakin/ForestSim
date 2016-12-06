@@ -180,6 +180,48 @@ void Forest::init() {
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // Generate our "Extra" Buffer
+    // This is used to render SSAO into to support SSAO and FXAA at the same time
+    // Initialize the extra frame buffer
+    glGenFramebuffers(1, &m_extra_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_extra_FBO);
+
+    glGenTextures(1, &m_extra_texture);
+    glBindTexture(GL_TEXTURE_2D, m_extra_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    // TODO change these to filter better later
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
+
+//    glGenRenderbuffers(1, &m_extra_depthBuffer);
+//    glBindRenderbuffer(GL_RENDERBUFFER, m_extra_depthBuffer);
+//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1920, 1080);
+//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_extra_depthBuffer);
+    glGenTextures(1, &m_extra_depthBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_extra_depthBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1920, 1080, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_extra_depthBuffer, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_extra_texture, 0);
+
+    GLenum toBeDrawn2 = GL_COLOR_ATTACHMENT0;
+    glDrawBuffers(1, &toBeDrawn2);
+
+    CHECK_GL_ERRORS;
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw "ERROR: Framebuffer created incorrectly";
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // Generate our lowest depth value texture
     glGenTextures(1, &m_lowestDepthTexture);
     glBindTexture(GL_TEXTURE_2D, m_lowestDepthTexture);
@@ -270,6 +312,11 @@ void Forest::guiLogic() {
         m_SSAO_renderMode = 0;
     }
 
+    ImGui::Separator();
+
+    ImGui::Checkbox("FXAA toggle", &m_FXAA_enabled);
+    ImGui::Checkbox("SSAO toggle", &m_SSAO_enabled);
+
     ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
     ImGui::End();
 }
@@ -314,7 +361,6 @@ void Forest::draw() {
         }
 
         glDisable(GL_CULL_FACE);
-//        glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
 
         GLuint shadow_texture = m_shadow_tex;
@@ -340,8 +386,27 @@ void Forest::draw() {
 
         if (m_SSAO_enabled) {
             // Do SSAO
+            // Bind extra buffer to render into
+            glBindFramebuffer(GL_FRAMEBUFFER, m_extra_FBO);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glViewport(0, 0, 1920, 1080);
             m_SSAO_renderer.render(m_sceneTexture, m_depthBuffer, m_SSAO_renderMode);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+            // Now we have to switch back
+            if (m_framebufferWidth == 1920) {
+                glViewport(0, 0, 1920, 1080);
+            } else {
+                glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
+            }
+            // Isn't this fun???
+
+            // Now render normally
+            if (m_FXAA_enabled) {
+                m_FXAA_renderer.render(m_extra_texture, m_FXAA_renderMode);
+            } else {
+                m_quadRenderer.render(m_extra_texture);
+            }
         } else {
             if (m_FXAA_enabled) {
                 m_FXAA_renderer.render(m_sceneTexture, m_FXAA_renderMode);

@@ -57,6 +57,11 @@ private:
     GLuint m_lowestDepthTexture;
     TextureRenderer m_quadRenderer;
 
+    // Just an extra render buffer and texture
+    GLuint m_extra_FBO;
+    GLuint m_extra_texture;
+    GLuint m_extra_depthBuffer;
+
     // For rendering shadow to extra FBO
     GLuint m_shadow_FBO;
     GLuint m_shadow_tex;
