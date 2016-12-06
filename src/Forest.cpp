@@ -41,7 +41,7 @@ Forest::Forest() :
     m_shadow_enabled(true),
     m_show_shadow(false),
     m_SSAO_enabled(true),
-    m_SSAO_renderMode(2) {
+    m_SSAO_renderMode(4) {
     // Empty
 }
 
@@ -265,8 +265,8 @@ void Forest::guiLogic() {
     }
 
     ImGui::InputInt("SSAO debug setting", &m_SSAO_renderMode, 1, 1);
-    if (m_SSAO_renderMode > 3) {
-        m_SSAO_renderMode = 3;
+    if (m_SSAO_renderMode > 4) {
+        m_SSAO_renderMode = 4;
     } else if (m_SSAO_renderMode < 0) {
         m_SSAO_renderMode = 0;
     }

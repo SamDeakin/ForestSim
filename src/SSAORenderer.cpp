@@ -31,7 +31,7 @@ void SSAORenderer::render(GLuint sceneTexture, GLuint depthTexture, GLint render
     glBindTexture(GL_TEXTURE_2D, m_noiseTexture);
     glUniform1i(m_uniform_noiseTexture, 5);
 
-    glUniform3fv(m_uniform_kernel, 32, &m_kernel[0][0]);
+    glUniform2fv(m_uniform_kernel, 32, m_kernel.data());
     glUniform1i(m_uniform_renderMode, renderMode);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -52,14 +52,14 @@ void SSAORenderer::init() {
     m_uniform_sceneTexture = m_quad_program.getUniformLocation("sceneTexture");
     m_uniform_renderMode = m_quad_program.getUniformLocation("renderMode");
     m_uniform_depthTexture = m_quad_program.getUniformLocation("depthTexture");
-//    m_uniform_kernel = m_quad_program.getUniformLocation("kernel");
+    m_uniform_kernel = m_quad_program.getUniformLocation("kernel");
     m_uniform_noiseTexture = m_quad_program.getUniformLocation("noiseTexture");
 
     // Init quad
     initQuadObject();
 
     mt19937 rng(time(NULL));
-    uniform_real_distribution<float> gen(0.0f, 1.0f);
+    uniform_real_distribution<float> gen(-1.0f, 1.0f);
 
     // Also init 32 by 32 texture for varying the coordinates, and fill it with noise texture
     std::vector<unsigned char> data;
@@ -87,6 +87,10 @@ void SSAORenderer::init() {
 
     // Also fill the kernel
     for (int i = 0; i < 32; i++) {
-        m_kernel.push_back(vec2(gen(rng), gen(rng)));
+        float x = gen(rng);
+        float y = gen(rng);
+        cout << x << " " << y << endl;
+        m_kernel.push_back(x);
+        m_kernel.push_back(y);
     }
 }

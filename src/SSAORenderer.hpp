@@ -23,7 +23,7 @@ private:
 
     GLuint m_noiseTexture;
 
-    std::vector<glm::vec2> m_kernel;
+    std::vector<float> m_kernel;
 };
 
 
