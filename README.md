@@ -1,3 +1,6 @@
+# Forest Simulator 2017
+The final project for my Graphics course. It reads a list of objects from the specified lua file and then arranges them to form a small "forest" that the user can then explore.
+
 # Compilation:
 Use CMAKE. Good luck!
 
@@ -67,3 +70,10 @@ Implementation details can be found in documentation/Implementation.pdf
 8. The program should enhance shadows using the ambient occlusion tech- niques outlined above
 9. The program should show crepuscular rays imitating the media refracting some but not all sunlight that passes through it.
 10. The program should implement the Fast Approximate AntiAliasing (FXAA) algorithm.
+
+## Improvements I wish I had time for
+1. LOD textures
+2. Area streaming
+3. Crepuscular rays
+4. Actual player and real world movement
+5. Smaller and multiple shadow maps
