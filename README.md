@@ -44,12 +44,6 @@ Rotations in x and z-axes are even more difficult. The model must contain the po
 # Implementation
 Implementation details can be found in documentation/Implementation.pdf
 
-#TODO
-5. Textures
-9. Crepuscular Rays
-8. SSAO
-11. Make good scene
-
 # Credits for assets:
     SkyboxSet1 is from Heiko Irrgang, https://93i.de/p/free-skybox-texture-set/
     GreenPine - http://tf3dm.com/3d-model/green-pine-26327.html
